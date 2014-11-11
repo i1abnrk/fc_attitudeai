@@ -2,6 +2,7 @@ fc_attitudeai
 =============
 
 A dynamic AI module for freeciv
+Work in progress
 
 PURPOSE (no warranty implied)
 Attitude AI is designed to mimic the behavior of SM-Civ4. The design
