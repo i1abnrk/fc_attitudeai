@@ -27,8 +27,8 @@ void ai_variants_init(void) {
   int i;
     /* Ensure we have enough space for players or teams. 
      *TODO: Need more ais in ruleset, for testing.*/
-  //fc_assert(ARRAY_SIZE(ai_variant_array) >= team_slot_count());
-  //fc_assert(ARRAY_SIZE(ai_variant_array) >= player_slot_count());
+  /*fc_assert(ARRAY_SIZE(ai_variant_array) >= team_slot_count());*/
+  /*fc_assert(ARRAY_SIZE(ai_variant_array) >= player_slot_count());*/
   memset(ai_variant_array, 0, sizeof(*ai_variant_array));
   for (i = 0; i < ARRAY_SIZE(ai_variant_array); i++) {
     ai_variant_array[i].id = (ai_variant_id) i;
@@ -75,7 +75,7 @@ void reason_destroy(struct reason *preason) {
   preason = NULL;
 }
 
-/*create a favorite condition*/
+/*Create a favorite condition.*/
 void favorite_new(struct ai_variant *paivari, struct universal type, int value) {
   fc_assert(universals_n_is_valid(type.kind));
   fc_assert_msg(value >= ATTITUDE_FAVOR_MIN && value <= ATTITUDE_FAVOR_MAX, 
@@ -102,14 +102,14 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
   
   reason_list_iterate(paivari->reasons, areason) {
     if(areason->rtype == rtype) {
-      //change value, halflife of the matching reason
+      /*change value, halflife of the matching reason*/
       success=TRUE;
       areason->value = preason->value;
       areason->halflife = preason->halflife;
     }
   } reason_list_iterate_end;
   
-  //no matching rtype in reasons, so append one to reasons
+  /*no matching rtype in reasons, so append one to reasons*/
   if(!success) {
     reason_new(paivari, preason->rtype, preason->value, preason->halflife);
   }
@@ -119,11 +119,15 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
 
 bool ai_variant_reason_remove(struct ai_variant *paivari, struct reason *preason) {
   bool success=FALSE;
+  
   return success;
 }
 
 bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfavor) {
   bool success=FALSE;
+  
+  struct universal type;
+  int value;
   
   return success;
 }
@@ -131,8 +135,10 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
 bool ai_variant_favorite_remove(struct ai_variant *paivari, struct favorite *pfavor) {
   bool success=FALSE;
   
+  
   return success;
 }
+
 /*Is there a leader by this name among the nations?*/
 bool rules_have_leader(const char *name) {
   bool found = FALSE;

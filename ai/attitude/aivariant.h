@@ -1,16 +1,17 @@
-//utility
+/* utility */
 #include "shared.h"
 #include "support.h"
 
-//common
+/* common */
 #include "fc_types.h"
 #include "events.h"
 
-//server/advisor
+/* server/advisor */
 #include "advdata.h"
 
 #define MAX_NUM_AI_VARIANTS MAX_NUM_ITEMS
-#define ATTITUDE_FAVOR_MIN -99//Leave a mandatory one percent chance
+/* Leave a mandatory one percent chance */
+#define ATTITUDE_FAVOR_MIN -99
 #define ATTITUDE_FAVOR_DEFAULT 0
 #define ATTITUDE_FAVOR_MAX 99
 #define ATTITUDE_REASON_MIN_VALUE -99
@@ -24,15 +25,17 @@
 
 struct ai_type;
 
-//>fc_types.h
+/*>fc_types.h*/
 typedef int ai_variant_id;
 
 /*Favorite structured to mirror universals_n in common/fc_types.h
  *Favorite aims to take a role at how aggressively certain "goals" are pursued
  *by the leader ai.*/
 struct favorite {
+  /* what is it? */
   struct universal type;
-  int value; //how much
+  /* how much? */
+  int value;
 };
 
 #define SPECLIST_TAG favorite
@@ -45,29 +48,29 @@ struct favorite {
  *TODO: Test these incrementally until universal_u|favorite|score_component can reasonably
  *substitute for reason_type in the functions created.*/
 /*enum reason_type {
-  //common/fc_types.h
-  REASON_FOOD = 0, //when food is the matter
-  REASON_TRADE,//when trade is the focus
-  REASON_POLLUTION,//when pollution is an issue
-  REASON_EXPANSION,//when expansion is abrupt
-  REASON_TREATY,//when a treaty is adjustible
-  REASON_POPULATION,//when population is the focus
-  //when a threat is made by a {treaty_state} or immediate player action,
+  common/fc_types.h
+  REASON_FOOD = 0,  when food is the matter
+  REASON_TRADE,  when trade is the focus
+  REASON_POLLUTION,  when pollution is an issue
+  REASON_EXPANSION,  when expansion is abrupt
+  REASON_TREATY,  when a treaty is adjustible
+  REASON_POPULATION,  when population is the focus
+    when a threat is made by a {treaty_state} or immediate player action,
    * (if discovered subj. to ai_level)
-   //server/advisors/advdata.h
+   server/advisors/advdata.h
   REASON_THREAT,
-  REASON_EXPLORE,//when the need to explore is hampered
-  REASON_SCIENCE,//when science resource is needed
-  REASON_GOLD,//when the economy needs focus
-  REASON_DIPLOMACY,//when diplomacy hampers other needs
+  REASON_EXPLORE,  when the need to explore is hampered
+  REASON_SCIENCE,  when science resource is needed
+  REASON_GOLD,  when the economy needs focus
+  REASON_DIPLOMACY,  when diplomacy hampers other needs
   REASON_TAX,
   REASON_LUXURY,
-  REASON_WONDER,//when a wonder is worshipped/required/obtained
-  REASON_SPACESHIP,//when a spaceship is desired/jealous
-  REASON_FAVORITE,//when a favorite *thing is coveted (advdata.goals)
+  REASON_WONDER,  when a wonder is worshipped/required/obtained
+  REASON_SPACESHIP,  when a spaceship is desired/jealous
+  REASON_FAVORITE,  when a favorite *thing is coveted (advdata.goals)
   REASON_CELEBRATE,
-  REASON_CRAZY,//when a leader is crazy, increase the fuzzy. (just for fun!)
-  REASON_LAST//stop iterating reasons
+  REASON_CRAZY,  when a leader is crazy, increase the fuzzy. (just for fun!)
+  REASON_LAST  stop iterating reasons
 };*/
 #define SPECENUM_NAME reason_type
 #define SPECENUM_VALUE0 REASON_FOOD
@@ -110,12 +113,13 @@ struct reason {
  *for player memory data to prevent corruption of savegames loaded from standard
  *freeciv.*/
 struct leader_memory {
-  int leader;//my player_slot_id
-  int nation;//other nation
-  int first_turn;//first turn of incident
+  int leader; /*my player_slot_id*/
+  int nation; /*other nation*/
+  int first_turn; /*first turn of incident*/
   struct reason reason;
-  bool sympathy; //TRUE iff "I like it", adjust == (sympathy?1:-1)*base_adjust
-  bool helped; //TRUE iff
+   /*TRUE iff "I like it", adjust == ((sympathy?1:-1) * base_adjust) */
+  bool sympathy;
+  bool helped;
 };
 /* Nation leader ai data. */
 #define SPECLIST_TAG leader_memory
@@ -133,7 +137,8 @@ struct ai_variant {
   struct reason_list *reasons;
     
   struct favorite_list *favorites;
-    
+  
+  /* TODO: save leader memories in a separate file from savegame. */
   struct leader_memory_list *memory;
 };
 

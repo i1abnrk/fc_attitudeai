@@ -17,7 +17,7 @@
 /* server */
 #include "ruleset.h"
 
-//local
+/* local */
 #include "aivariant.h"
 
 #define LOOKUP_INT_REASON_VAL(file, format, sec, rstr, row)  \
