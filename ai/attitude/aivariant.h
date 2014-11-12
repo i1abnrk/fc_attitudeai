@@ -169,9 +169,12 @@ void ai_variant_destroy(struct ai_variant *paivari);
 /* These foo_amend functions maintain uniqueness. foo_amend is like
  * pfoo = foo_get_index(i); 
  * foo_remove(pfoo); 
- * foo_mutator(pfoo, bar); 
- * foo_put_index(pfoo, i)*/
+ * foo_change(pfoo, bar); 
+ * foo_put_index(pfoo, i);
+ */
+/* the following bools return TRUE iff state is changed */
 bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason);
+/* foo_remove actually resets default values */
 bool ai_variant_reason_remove(struct ai_variant *paivari, struct reason *preason);
 bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfavor);
 bool ai_variant_favorite_remove(struct ai_variant *paivari, struct favorite *pfavor);
