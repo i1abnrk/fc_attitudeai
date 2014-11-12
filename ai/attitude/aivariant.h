@@ -6,6 +6,9 @@
 #include "fc_types.h"
 #include "events.h"
 
+/* ai */
+#include "traits.h"
+
 /* server/advisor */
 #include "advdata.h"
 

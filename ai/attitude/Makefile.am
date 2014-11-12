@@ -5,7 +5,7 @@ aimodule_LTLIBRARIES = fc_ai_attitude.la
 
 #ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS = -I$(top_srcdir)/utility -I$(top_srcdir)/common -I$(top_srcdir)/server -I$(top_srcdir)/server/advisors
+AM_CPPFLAGS = -I$(top_srcdir)/utility -I$(top_srcdir)/common -I$(top_srcdir)/ai -I$(top_srcdir)/server -I$(top_srcdir)/server/advisors
 
 fc_ai_attitude_la_SOURCES = \
 attitudeai.c \
