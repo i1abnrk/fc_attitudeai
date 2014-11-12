@@ -118,14 +118,12 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
   return changed;
 }
 
-bool ai_variant_reason_remove(struct ai_variant *paivari, struct reason *preason) {
+bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *rtype) {
   bool changed=FALSE;
-  enum reason_type rtype;
-  rtype = preason->rtype;
   
-  reason_list_iterate(paivari->reasons, areason) {
-    if(areason->rtype == rtype) {
-      if (areason->value != ATTITUDE_REASON_DEFAULT_VALUE || 
+  reason_list_iterate(paivari->reasons, preason) {
+    if(preason->rtype == rtype) {
+      if (preason->value != ATTITUDE_REASON_DEFAULT_VALUE || 
             areason->halflife != ATTITUDE_HALFLIFE_DEFAULT_TURNS) {
         changed = TRUE;
         reason_new(paivari, rtype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_HALFLIFE_DEFAULT_TURNS);
@@ -143,26 +141,35 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
             "Invalid value %d for favorite. Must be between %d and %d",
             value, ATTITUDE_FAVOR_MIN, ATTITUDE_FAVOR_MAX);
             
-  struct universal type; 
-  
+  struct universal type;
+  /* TODO: validate pfavor->type.value*/
   favorite_list_iterate(paivari->favorites, afavor) {
     if (pfavor->type.kind == afavor->type.kind) {
+      if (afavor->type.value != pfavor->type.value) {
+        changed = TRUE;
+        afavor->type.value = pfavor->type.value;
+      }
       if (afavor->value != pfavor->value) {
         changed = TRUE;
         afavor->value = pfavor->value;
       }
     }
   } favorite_list_iterate_end;
-  
+  /*TODO: should I free pfavor here?*/
   return changed;
 }
 
 /* foo_remove actually resets default values */
-bool ai_variant_favorite_remove(struct ai_variant *paivari, struct favorite *pfavor) {
-  bool success=FALSE;
+bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universals_n kind) {
+  bool changed=FALSE;
   
+  favorite_list_iterate(paivari->favorites, pfavor) {
+    if (pfavor->type.kind == kind) {
+      /*TODO: type.value = universals_u*/
+    }
+  } favorite_list_iterate_end;
   
-  return success;
+  return changed;
 }
 
 /*Is there a leader by this name among the nations?*/

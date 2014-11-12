@@ -167,14 +167,14 @@ struct ai_variant *ai_variant_new(const char *name);
 bool rules_have_leader(const char *name);
 void ai_variant_destroy(struct ai_variant *paivari);
 /* These foo_amend functions maintain uniqueness. foo_amend is like
- * pfoo = foo_get_index(i); 
- * foo_remove(pfoo); 
- * foo_change(pfoo, bar); 
+ * pfoo = foo_get_index(i);
+ * foo_remove(pfoo);
+ * foo_change(pfoo, bar);
  * foo_put_index(pfoo, i);
  */
 /* the following bools return TRUE iff state is changed */
 bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason);
-/* foo_remove actually resets default values */
-bool ai_variant_reason_remove(struct ai_variant *paivari, struct reason *preason);
+/* foo_reset actually resets default values, preason can be freed after call? */
+bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type rtype);
 bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfavor);
-bool ai_variant_favorite_remove(struct ai_variant *paivari, struct favorite *pfavor);
+bool ai_variant_favorite_reset(struct ai_variant *paivari, struct favorite *pfavor);
