@@ -114,7 +114,14 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
 
 bool ai_variant_reason_remove(struct ai_variant *paivari, struct reason *preason) {
   bool success=FALSE;
+  enum reason_type rtype;
+  rtype = preason->rtype;
   
+  reason_list_iterate(paivari->reasons, areason) {
+    if(areason->rtype == rtype) {
+      reason_new(paivari, rtype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_VALUE_DEFAULT_TURNS);
+    }
+  } reason_list_iterate_end;
   return success;
 }
 
@@ -122,7 +129,7 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
   bool success=FALSE;
   
   struct universal type;
-  int value;
+  int value; 
   
   return success;
 }
