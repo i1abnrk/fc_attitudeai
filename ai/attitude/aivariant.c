@@ -8,7 +8,7 @@
 
 #include "aivariant.h"
 
-static struct ai_variant ai_variant_array[MAX_NUM_AI_VARIANTS];
+static struct ai_variant_list master_aiv_list;
 static bool AIV_INITIALIZED=FALSE;
 
 const char *ai_variant_name(struct ai_variant *paivari) {
@@ -17,26 +17,21 @@ const char *ai_variant_name(struct ai_variant *paivari) {
 }
 
 struct ai_variant *ai_variant_by_number(ai_variant_id id) {
-  if (id < 0 || id >= ARRAY_SIZE(ai_variant_array)) {
-    return NULL;
-  }
-  return &ai_variant_array[id];
+  fc_assert_msg(id >= 0 && id < ai_variant_list_size(master_aiv_list),
+    "AI Variant id %d out of range. Must be between %d and %d",
+    id, 0, ai_variant_list_size(master_aiv_list));
+
+  return ai_variant_list_get(master_aiv_list, id);
 }
 
 void ai_variants_init(void) {
   int i;
     /* Ensure we have enough space for players or teams. 
      *TODO: Need more ais in ruleset, for testing.*/
-  /*fc_assert(ARRAY_SIZE(ai_variant_array) >= team_slot_count());*/
-  /*fc_assert(ARRAY_SIZE(ai_variant_array) >= player_slot_count());*/
-  memset(ai_variant_array, 0, sizeof(*ai_variant_array));
-  for (i = 0; i < ARRAY_SIZE(ai_variant_array); i++) {
-    ai_variant_array[i].id = (ai_variant_id) i;
-    ai_variant_array[i].name = "";
-    ai_variant_array[i].reasons = reason_list_new();
-    ai_variant_array[i].favorites = favorite_list_new();
-    ai_variant_array[i].memory = leader_memory_list_new();
-  }
+  /*fc_assert_msg(ai_variant_list_size(ai_variant_array) >= team_slot_count());*/
+  /*fc_assert_msg(ai_variant_list_size(ai_variant_array) >= player_slot_count());*/
+  master_aiv_list = ai_variant_list_new();
+  
     /*TODO: array_pack(ai_variant_array, i)
    * Because I don't want to mess with game.h for a dll/la
    */

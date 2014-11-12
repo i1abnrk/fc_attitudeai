@@ -5,9 +5,10 @@
 /* common */
 #include "fc_types.h"
 #include "events.h"
+#include "traits.h"
 
 /* ai */
-#include "traits.h"
+#include "aitraits.h"
 
 /* server/advisor */
 #include "advdata.h"
@@ -165,7 +166,7 @@ void favorite_destroy(struct favorite *pfavor);
 struct ai_variant *ai_variant_new(const char *name);
 bool rules_have_leader(const char *name);
 void ai_variant_destroy(struct ai_variant *paivari);
-/* These foo_amend functions maintains uniqueness. foo_amend is like
+/* These foo_amend functions maintain uniqueness. foo_amend is like
  * pfoo = foo_get_index(i); 
  * foo_remove(pfoo); 
  * foo_mutator(pfoo, bar); 
