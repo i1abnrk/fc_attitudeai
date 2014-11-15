@@ -103,7 +103,7 @@ struct favorite {
 #include "specenum_gen.h"
 
 struct reason {
-  enum reason_type rtype;
+  enum reason_type type;
   int value;
   int halflife;
 };
@@ -128,7 +128,7 @@ struct leader_memory {
   struct reason reason;
    /*TRUE iff "I like it", adjust == ((sympathy?1:-1) * base_adjust) */
   bool sympathy;
-  bool helped;
+  bool helped;/*did nation seem to respond to diplomacy?*/
 };
 /* Nation leader ai data. */
 #define SPECLIST_TAG leader_memory

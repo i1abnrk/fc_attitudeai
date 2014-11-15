@@ -37,7 +37,7 @@ bool fc_ai_attitude_setup(struct ai_type *ai)
   ai->funcs.split_by_civil_war = dai_assess_danger_player;
 
   ai->funcs.phase_begin = dai_data_phase_begin;
-  ai->funcs.phase_finished = dai_data_phase_finished;
+  ai->funcs.phase_finished = dai_data_phase_finished; free expiring memories
 
   ai->funcs.city_alloc = dai_city_alloc;
   ai->funcs.city_free = dai_city_free;

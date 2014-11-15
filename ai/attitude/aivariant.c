@@ -58,13 +58,13 @@ void reason_new(struct ai_variant *paivari, enum reason_type rt, int value, int 
             
   struct reason *r;
   r = fc_malloc(1 * sizeof(r)); 
-  r->rtype = rt;
+  r->type = rt;
   r->value = value;
   r->halflife = halflife;
 }
 
 void reason_destroy(struct reason *preason) {
-  free(&preason->rtype);
+  free(&preason->type);
   free(&preason->value);
   free(&preason->halflife);
   free(preason);
@@ -93,11 +93,11 @@ void favorite_destroy(struct favorite *pfavor) {
 
 bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason) {
   bool changed = FALSE;
-  enum reason_type rtype;
-  rtype = preason->rtype;
+  enum reason_type type;
+  type = preason->type;
   
   reason_list_iterate(paivari->reasons, areason) {
-    if(areason->rtype == rtype) {
+    if(areason->type == type) {
       /*change value, halflife of the matching reason*/
       if (areason->value != preason->value) {
         changed = TRUE;
@@ -111,23 +111,23 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
     }
   } reason_list_iterate_end;
   
-  /*no matching rtype in reasons, so append one to reasons*/
-  if(!success) {
-    reason_new(paivari, preason->rtype, preason->value, preason->halflife);
+  /*no matching type in reasons, so append one to reasons*/
+  if(!changed) {
+    reason_new(paivari, preason->type, preason->value, preason->halflife);
   }
   
   return changed;
 }
 
-bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *rtype) {
+bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *ptype) {
   bool changed=FALSE;
   
   reason_list_iterate(paivari->reasons, preason) {
-    if(preason->rtype == rtype) {
+    if(preason->type == ptype) {
       if (preason->value != ATTITUDE_REASON_DEFAULT_VALUE || 
             areason->halflife != ATTITUDE_HALFLIFE_DEFAULT_TURNS) {
         changed = TRUE;
-        reason_new(paivari, rtype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_HALFLIFE_DEFAULT_TURNS);
+        reason_new(paivari, ptype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_HALFLIFE_DEFAULT_TURNS);
       }
     }
   } reason_list_iterate_end;
@@ -209,7 +209,7 @@ struct ai_trait *favorite_as_trait(struct favorite *pfavor) {
   struct ai_trait f_trait;
   int ft_val, ft_mod;
   
-  ft_val = universal_number(pfavor->type);
+  ft_val = ATTITUDE_FAVOR_DEFAULT;
   ft_mod = pfavor->value;
   
   f_trait = (ai_trait) {"val"=ft_val, "mod"=ft_mod};
@@ -225,7 +225,17 @@ struct trait_limits *favorite_limits(void) {
 }
 
 struct ai_trait *reason_as_trait(struct reason *preason) {
-
+  struct ai_trait r_trait;
+  enum reason_type rt_type;
+  int rt_hl, rt_val;
+  
+  rt_type = preason->type;
+  rt_val = preason->value;
+  rt_hl = preason->halflife;
+  
+  /*calculate memories*/
+  
+  return r_trait;
 }
 
 struct trait_limit *reason_limits(void) {
