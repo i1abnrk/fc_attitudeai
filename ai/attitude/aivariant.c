@@ -5,6 +5,7 @@
 /* common */
 #include "nation.h"
 #include "game.h"
+#include "requirements.h"
 
 #include "aivariant.h"
 
@@ -202,4 +203,39 @@ int aai_clip(struct ai_trait ait) {
   } else {
     return CLIP(ait.mod, dai, 100-aai)
   }
+}
+
+struct ai_trait *favorite_as_trait(struct favorite *pfavor) {
+  struct ai_trait f_trait;
+  int ft_val, ft_mod;
+  
+  ft_val = universal_number(pfavor->type);
+  ft_mod = pfavor->value;
+  
+  f_trait = (ai_trait) {"val"=ft_val, "mod"=ft_mod};
+  
+  return f_trait;
+}
+
+struct trait_limits *favorite_limits(void) {
+  struct trait_limits f_lims;
+  f_lims.min = ATTITUDE_FAVOR_MIN;
+  f_lims.max = ATTITUDE_FAVOR_MAX;
+  return f_lims;
+}
+
+struct ai_trait *reason_as_trait(struct reason *preason) {
+
+}
+
+struct trait_limit *reason_limits(void) {
+
+}
+
+struct ai_trait *memory_as_trait(struct leader_memory_list *pmemories) {
+
+}
+
+struct trait_limit *memory_limits(void) {
+
 }
