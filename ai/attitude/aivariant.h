@@ -24,21 +24,24 @@
 #define ATTITUDE_HALFLIFE_MIN_TURNS 1
 #define ATTITUDE_HALFLIFE_MAX_TURNS 200
 #define ATTITUDE_HALFLIFE_DEFAULT_TURNS ATTITUDE_HALFLIFE_MAX_TURNS
-#define AAI_CLIP(dai, aai) ((aai>=0) ? CLIP(aai, dai, 100) \
-                                     : CLIP(0, dai, 100-aai))
+#define AAI_CLIP(ait) aai_clip(ait)
 
 struct ai_type;
+struct ai_trait;
+struct ai_limits;
 
 /*>fc_types.h*/
 typedef int ai_variant_id;
 
-/*Favorite structured to mirror universals_n in common/fc_types.h
+/**
+ *Favorite structured to mirror universals_n in common/fc_types.h
  *Favorite aims to take a role at how aggressively certain "goals" are pursued
- *by the leader ai.*/
+ *by the leader ai.
+ */
 struct favorite {
-  /* what is it? */
+  /** what is it? */
   struct universal type;
-  /* how much? */
+  /** how much? */
   int value;
 };
 
@@ -51,7 +54,8 @@ struct favorite {
 /*Reasons to make temporary adjustments to advdata of player ai
  *TODO: Test these incrementally until universal_u|favorite|score_component can reasonably
  *substitute for reason_type in the functions created.*/
-/*enum reason_type {
+/** 
+  enum reason_type {
   common/fc_types.h
   REASON_FOOD = 0,  when food is the matter
   REASON_TRADE,  when trade is the focus
@@ -75,7 +79,8 @@ struct favorite {
   REASON_CELEBRATE,
   REASON_CRAZY,  when a leader is crazy, increase the fuzzy. (just for fun!)
   REASON_LAST  stop iterating reasons
-};*/
+};
+*/
 #define SPECENUM_NAME reason_type
 #define SPECENUM_VALUE0 REASON_FOOD
 #define SPECENUM_VALUE1 REASON_SHIELD
@@ -165,6 +170,7 @@ void favorite_new(struct ai_variant *paivari, struct universal type, int value);
 void favorite_destroy(struct favorite *pfavor);
 struct ai_variant *ai_variant_new(const char *name);
 bool rules_have_leader(const char *name);
+int aai_clip(struct ai_trait *ait);
 void ai_variant_destroy(struct ai_variant *paivari);
 /* These foo_amend functions maintain uniqueness. foo_amend is like
  * pfoo = foo_get_index(i);
@@ -178,3 +184,9 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
 bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type rtype);
 bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfavor);
 bool ai_variant_favorite_reset(struct ai_variant *paivari, struct favorite *pfavor);
+struct ai_trait *favorite_as_trait(struct favorite *pfavor);
+struct trait_limits *favorite_limits(void);
+struct ai_trait *reason_as_trait(struct reason *preason);
+struct trait_limit *reason_limits(void);
+struct ai_trait *memory_as_trait(struct leader_memory_list *pmemories);
+struct trait_limit *memory_limits(void);

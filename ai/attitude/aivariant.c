@@ -44,7 +44,7 @@ bool aiv_initialized(void) {
 
 /*TODO: Undef favorite|reason_new|destroy 
  * and use favorite|reason_list_amend|remove instead */
-/*Create a new reason for the leader data.*/
+/** Create a new reason for the leader data.*/
 void reason_new(struct ai_variant *paivari, enum reason_type rt, int value, int halflife) {
   fc_assert_msg(value>=ATTITUDE_REASON_MIN_VALUE &&
             value<=ATTITUDE_REASON_MAX_VALUE, 
@@ -70,7 +70,7 @@ void reason_destroy(struct reason *preason) {
   preason = NULL;
 }
 
-/*Create a favorite condition.*/
+/** Create a favorite condition. */
 void favorite_new(struct ai_variant *paivari, struct universal type, int value) {
   fc_assert(universals_n_is_valid(type.kind));
   fc_assert_msg(value >= ATTITUDE_FAVOR_MIN && value <= ATTITUDE_FAVOR_MAX, 
@@ -177,7 +177,7 @@ bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universal type) 
   return changed;
 }
 
-/*Is there a leader by this name among the nations?*/
+/** Is there a leader by this name among the nations? */
 bool rules_have_leader(const char *name) {
   bool found = FALSE;
   nations_iterate(pnation) {
@@ -188,4 +188,18 @@ bool rules_have_leader(const char *name) {
     }
   } nations_iterate_end;
   return found;
+}
+
+/**
+ * As ai_trait_get_value in aitraits.h, but clips negative mod from the high
+ * end as well. Ai_variant model uses multiplicative, whereas trait model uses
+ * an additive model.
+ */
+ 
+int aai_clip(struct ai_trait ait) {
+  if (ait.mod>=0) { 
+    return CLIP(ait.mod, ait.val, 100)
+  } else {
+    return CLIP(ait.mod, dai, 100-aai)
+  }
 }
