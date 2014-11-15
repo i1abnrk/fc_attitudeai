@@ -160,14 +160,19 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
 }
 
 /* foo_remove actually resets default values */
-bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universals_n kind) {
+bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universal type) {
   bool changed=FALSE;
+  enum universals_n un;
+  struct favorite fav=favorite_new(type, ATTITUDE_FAVOR_DEFAULT);
   
-  favorite_list_iterate(paivari->favorites, pfavor) {
-    if (pfavor->type.kind == kind) {
-      /*TODO: type.value = universals_u*/
-    }
-  } favorite_list_iterate_end;
+  favorite_list_iterate(paivari->favorites, oldfav) {
+    if (type == oldfav->type) {
+      if (oldfav != fav) {
+        changed = TRUE;
+        oldfav = fav;
+      }
+    }    
+  } favorite_list_iterate_end();
   
   return changed;
 }
