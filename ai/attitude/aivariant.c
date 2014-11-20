@@ -198,10 +198,10 @@ bool rules_have_leader(const char *name) {
  */
  
 int aai_clip(struct ai_trait ait) {
-  if (ait.mod>=0) { 
+  if (ait.mod >= 0) { 
     return CLIP(ait.mod, ait.val, 100)
   } else {
-    return CLIP(ait.mod, dai, 100-aai)
+    return CLIP(0, ait.val, 100-ait.mod)
   }
 }
 
@@ -224,25 +224,50 @@ struct trait_limits *favorite_limits(void) {
   return f_lims;
 }
 
-struct ai_trait *reason_as_trait(struct reason *preason) {
+struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_type *prtype) {
   struct ai_trait r_trait;
+  struct aivariant *paivari;
   enum reason_type rt_type;
-  int rt_hl, rt_val;
+  int curr_turn, rt_adj, rt_hl, rt_turns, rt_val, slot;
   
-  rt_type = preason->type;
-  rt_val = preason->value;
-  rt_hl = preason->halflife;
+  paivari = get_aiv_by_number(our_aiv_id);
+  rt_type = prtype;
+  slot = their_slot_id;
+  curr_turn = game.info.turn;
   
   /*calculate memories*/
+  leader_memory_list_iterate(paivari, pmemory) {
+    enum reason_type mtype = pmemory->reason.type;
+    if (rt_type == mtype) {
+      if (slot == pmemory->nation) {
+        rt_turns = curr_turn - pmemory->first_turn;
+        rt_hl = pmemory.reason.halflife;
+        rt_val = pmemory.reason.value;
+        rt_adj = calc_halflife(rt_val, rt_hl, rt_turns);
+        rt_adj = ((pmemory->sympathetic)?rt_adj:-rt_adj));
+      } else {
+        rt_adj = 0;
+      }
+    } else {
+      rt_adj = 0;
+    }
+  } leader_memory_list_end;
+  
+  r_trait = (ai_trait) {"val"=ATTITUDE_REASON_DEFAULT_VALUE, "mod"=rt_adj};  
+  r_trait = aai_clip(r_trait);
   
   return r_trait;
 }
 
 struct trait_limit *reason_limits(void) {
-
+  struct trait_limits r_lims;
+  r_lims.min=ATTITUDE_REASON_MIN_VALUE;
+  r_lims.max=ATTITUDE_REASON_MAX_VALUE;
+  return r_lims;
 }
 
-struct ai_trait *memory_as_trait(struct leader_memory_list *pmemories) {
+/*maybe unnecessary*/
+struct ai_trait *memory_as_trait(int aiv_id) {
 
 }
 

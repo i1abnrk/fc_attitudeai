@@ -5,6 +5,7 @@
 /* common */
 #include "fc_types.h"
 #include "events.h"
+#include "player.h"
 #include "traits.h"
 
 /* ai */
@@ -122,10 +123,10 @@ struct reason {
  *for player memory data to prevent corruption of savegames loaded from standard
  *freeciv.*/
 struct leader_memory {
-  int leader; /*my player_slot_id*/
-  int nation; /*other nation*/
+  int leader; /*our player_slot_id*/
+  int nation; /*their player_slot_id*/
   int first_turn; /*first turn of incident*/
-  struct reason reason;
+  struct reason reason; /*trigger*/
    /*TRUE iff "I like it", adjust == ((sympathy?1:-1) * base_adjust) */
   bool sympathy;
   bool helped;/*did nation seem to respond to diplomacy?*/
@@ -186,7 +187,7 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
 bool ai_variant_favorite_reset(struct ai_variant *paivari, struct favorite *pfavor);
 struct ai_trait *favorite_as_trait(struct favorite *pfavor);
 struct trait_limits *favorite_limits(void);
-struct ai_trait *reason_as_trait(struct reason *preason);
+struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_type *prtype);
 struct trait_limit *reason_limits(void);
 struct ai_trait *memory_as_trait(struct leader_memory_list *pmemories);
 struct trait_limit *memory_limits(void);
