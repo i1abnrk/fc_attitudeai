@@ -14,7 +14,7 @@
 /* server/advisor */
 #include "advdata.h"
 
-#define MAX_NUM_AI_VARIANTS MAX_NUM_ITEMS
+#define MAX_NUM_AI_VARIANTS MAX_UINT16
 /* Leave a mandatory one percent chance */
 #define ATTITUDE_FAVOR_MIN -99
 #define ATTITUDE_FAVOR_DEFAULT 0
@@ -189,5 +189,3 @@ struct ai_trait *favorite_as_trait(struct favorite *pfavor);
 struct trait_limits *favorite_limits(void);
 struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_type *prtype);
 struct trait_limit *reason_limits(void);
-struct ai_trait *memory_as_trait(struct leader_memory_list *pmemories);
-struct trait_limit *memory_limits(void);

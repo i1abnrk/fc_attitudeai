@@ -266,11 +266,3 @@ struct trait_limit *reason_limits(void) {
   return r_lims;
 }
 
-/*maybe unnecessary*/
-struct ai_trait *memory_as_trait(int aiv_id) {
-
-}
-
-struct trait_limit *memory_limits(void) {
-
-}

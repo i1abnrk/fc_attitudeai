@@ -1,6 +1,6 @@
 [datafile]
-description="Cities data for Freeciv"
-options="+Freeciv-2.4-ruleset"
+description="AI variants for attitude ai"
+options="+Freeciv-ruleset-Devel-2014.September.14c"
 
 ; Describes the attitude of a leader controlled by ai. If the leader is not
 ; listed here it will use the default ai. Favorite is from attitudeai.h, Reason
@@ -27,26 +27,23 @@ favorite = {
 
 reason = {
 "type", "value", "halflife"
-_("Food"), 10, 25
-_("Trade"), 25, 25
-_("Pollution"), 0, 200
-_("Expansion"), 50, 100
-_("Treaty"), 10, 50
-_("Population"), 0, 200
-_("Threat"), 25, 50
-_("Explore"), 50, 50
-_("Science"), 15, 25
-_("Gold"), 25, 100
-_("Tax"), -25, 100
-_("Luxury"), 15, 75
-_("Diplomacy"), 15, 100
-_("Wonder"), 0, 200
-_("Spaceship"), 0, 200
-_("Favorite"), 20, 100
-_("Celebrate"), 10, 25
-_("Crazy"), 0, 200
-_("Last"),,
+"Food", 10, 25
+"Trade", 25, 25
+"Pollution", 0, 200
+"Expansion", 50, 100
+"Treaty", 10, 50
+"Population", 0, 200
+"Threat", 25, 50
+"Explore", 50, 50
+"Science", 15, 25
+"Gold", 25, 100
+"Tax", -25, 100
+"Luxury", 15, 75
+"Diplomacy", 15, 100
+"Wonder", 0, 200
+"Spaceship", 0, 200
+"Favorite", 20, 100
+"Celebrate", 10, 25
+"Crazy", 0, 200
 }
 
-[aivariant_JCaesar]
-name="Julius Caesar"
