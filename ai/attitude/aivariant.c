@@ -93,27 +93,42 @@ void favorite_destroy(struct favorite *pfavor) {
 
 bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason) {
   bool changed = FALSE;
+  int value;
+  int halflife;
   enum reason_type type;
+  
+  value = preason->value;
+  halflife = preason->halflife;
   type = preason->type;
+  
+  fc_assert_msg(value>=ATTITUDE_REASON_MIN_VALUE &&
+            value<=ATTITUDE_REASON_MAX_VALUE, 
+            "Invalid value %d for reason. Must be between %d and %d",
+            value, ATTITUDE_REASON_MIN_VALUE, ATTITUDE_REASON_MAX_VALUE);
+  fc_assert_msg(halflife>=ATTITUDE_HALFLIFE_MIN_TURNS &&
+            halflife<=ATTITUDE_HALFLIFE_MAX_TURNS, 
+            "Invalid halflife %d for reason. Must be between %d and %d",
+            halflife, ATTITUDE_HALFLIFE_MIN_TURNS, ATTITUDE_HALFLIFE_MAX_TURNS);
+  fc_assert_msg(reason_type_is_valid(type), "Invalid reason_type %s", type) 
   
   reason_list_iterate(paivari->reasons, areason) {
     if(areason->type == type) {
       /*change value, halflife of the matching reason*/
-      if (areason->value != preason->value) {
+      if (areason->value != value) {
         changed = TRUE;
-        areason->value = preason->value;
+        areason->value = value;
       }
-      if (areason->halflife != preason->halflife) {
+      if (areason->halflife != halflife) {
         changed = TRUE;
-        areason->halflife = preason->halflife;
+        areason->halflife = halflife;
       }
       
     }
   } reason_list_iterate_end;
   
-  /*no matching type in reasons, so append one to reasons*/
+  /*no matching type in reasons, so append this one to paivari->reasons*/
   if(!changed) {
-    reason_new(paivari, preason->type, preason->value, preason->halflife);
+    reason_new(paivari, type, value, halflife);
   }
   
   return changed;
@@ -125,7 +140,7 @@ bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *ptype
   reason_list_iterate(paivari->reasons, preason) {
     if(preason->type == ptype) {
       if (preason->value != ATTITUDE_REASON_DEFAULT_VALUE || 
-            areason->halflife != ATTITUDE_HALFLIFE_DEFAULT_TURNS) {
+            preason->halflife != ATTITUDE_HALFLIFE_DEFAULT_TURNS) {
         changed = TRUE;
         reason_new(paivari, ptype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_HALFLIFE_DEFAULT_TURNS);
       }
@@ -136,23 +151,28 @@ bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *ptype
 
 bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfavor) {
   bool changed=FALSE;
+  enum universals_n kind;
+  int value;
   
-  fc_assert(universals_n_is_valid(pfavor->type.kind));
-  fc_assert_msg(pfavor->value >= ATTITUDE_FAVOR_MIN && value <= ATTITUDE_FAVOR_MAX, 
+  kind = pfavor->type.kind;
+  value = pfavor->value;
+  
+  fc_assert(universals_n_is_valid(kind));
+  fc_assert_msg(value >= ATTITUDE_FAVOR_MIN && value <= ATTITUDE_FAVOR_MAX, 
             "Invalid value %d for favorite. Must be between %d and %d",
             value, ATTITUDE_FAVOR_MIN, ATTITUDE_FAVOR_MAX);
             
   struct universal type;
   /* TODO: validate pfavor->type.value*/
   favorite_list_iterate(paivari->favorites, afavor) {
-    if (pfavor->type.kind == afavor->type.kind) {
+    if (kind == afavor->type.kind) {
       if (afavor->type.value != pfavor->type.value) {
         changed = TRUE;
         afavor->type.value = pfavor->type.value;
       }
-      if (afavor->value != pfavor->value) {
+      if (afavor->value != value) {
         changed = TRUE;
-        afavor->value = pfavor->value;
+        afavor->value = value;
       }
     }
   } favorite_list_iterate_end;

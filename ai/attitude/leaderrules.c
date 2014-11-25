@@ -203,9 +203,15 @@ static void load_aivariants(struct section_file *file) {
      ****************************************************************/
     struct ai_variant *v = ai_variant_by_number(i);
     v->id = i;
-    v->name = secfile_lookup_str(file, "%s.%s", sec_name, "name");
+    vname = secfile_lookup_str(file, "%s.%s", sec_name, "name");
+    if (!rules_have_leader(vname)) {
+      ruleset_error(LOG_ERROR, "Leader name in aivariants.ruleset \'%s\' not found in nations.ruleset",
+                 vname);
+    }
+    v->name = vname;
     load_reasons(file, v, psection);
     load_favorites(file, v, psection);
+    /*TODO: LOAD memories FROM SAVEFILE*/
     v->memory = leader_memory_list_new();
     i++;
   } section_list_iterate_end;
@@ -215,12 +221,12 @@ static void load_aivariants(struct section_file *file) {
 
 enum reason_type reason_type_by_rule(const char *type) {
   const char *rulename = strcat("REASON_", strtoupper(type));
-  enum reason_type rtype = reason_type_by_name(rulename, fc_strcasecmp);
-  if(!reason_type_is_valid(rtype)) {
-    ruleset_error(LOG_FATAL, ("Invalid reason_type %s in ruleset."), 
-        rulename);
+  enum reason_type type = reason_type_by_name(rulename, fc_strcasecmp);
+  if(!reason_type_is_valid(type)) {
+    ruleset_error(LOG_FATAL, ("Invalid reason_type \'%s\' in ruleset %s."), 
+        type, rulename);
   }
-  return rtype;
+  return type;
 }
 
 void load_reasons(struct section_file *file, struct ai_variant *paivari, 
@@ -230,12 +236,11 @@ void load_reasons(struct section_file *file, struct ai_variant *paivari,
   const char *type;
   int val, hl;
   int row = 0;
-  //for each row in reasons table do:
-  
-    //get the reason_type from the "type" column value
-    //get the value from the "value" column
-    //get the halflife from the "halflife" columns
-  //endfor
+  /*for each row in reasons table do:
+      get the reason_type from the "type" column value
+      get the value from the "value" column
+      get the halflife from the "halflife" column
+    endfor*/
   type = secfile_lookup_str_default(file, NULL, "%s.%s%d.type", sec, rstr, row);
   while (NULL!=type && 0!=fc_strcasecmp("LAST", type)) {
     val = LOOKUP_INT_REASON_VAL(file, "%s.%s%d.value", sec, rstr, row);
@@ -243,7 +248,7 @@ void load_reasons(struct section_file *file, struct ai_variant *paivari,
     row++;
     
     enum reason_type rtype = reason_type_by_rule(type);
-    reason_new(paivari, rtype, val, hl);
+    ai_variant_reason_amend(paivari, rtype, val, hl);
     type = secfile_lookup_str_default(file, NULL, "%s.%s%d.type", sec, rstr, row);
   }//wend
 }
@@ -269,7 +274,7 @@ void load_favorites(struct section_file *file,
     row++;
     
     struct universal ftype = universal_by_rule_name(type, name);
-    favorite_new(paivari, ftype, val);
+    ai_variant_favorite_amend(paivari, ftype, val);
     type = secfile_lookup_str_default(file, NULL, "%s.%s%d.type", sec, fstr, row);
     name = secfile_lookup_str_default(file, NULL, "%s.%s%d.name", sec, fstr, row);
   }//wend
