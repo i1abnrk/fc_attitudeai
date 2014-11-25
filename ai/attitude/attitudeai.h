@@ -12,4 +12,5 @@ bool fc_ai_attitude_setup(struct ai_type *ai);
 bool leader_has_attitude(struct nation_leader pleader);
 bool threaded_ai_enabled(void);
 
+void att_player_alloc(struct player *pplayer);
 #endif /* FCAI__ATTITUDEAI_H */

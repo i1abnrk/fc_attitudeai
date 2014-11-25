@@ -286,3 +286,22 @@ struct trait_limit *reason_limits(void) {
   return r_lims;
 }
 
+
+bool player_has_variant(struct player *pplayer) {
+  bool is_ai;
+  const char *nlname, *ainame;
+  
+  is_ai = pplayer->ai_controlled;
+  if (!is_ai) {
+    return FALSE;
+  }
+  
+  nlname = player_name(*pplayer);
+  ai_variant_list_iterate(ai_variants(), paivari) {
+    ainame = paivari->name;
+    if (is_ai && nlname == ainame) {
+       return TRUE;   
+    }
+  } ai_variant_list_end;
+  return FALSE;
+}

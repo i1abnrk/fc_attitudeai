@@ -189,3 +189,4 @@ struct ai_trait *favorite_as_trait(struct favorite *pfavor);
 struct trait_limits *favorite_limits(void);
 struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_type *prtype);
 struct trait_limit *reason_limits(void);
+bool player_has_variant(struct player *pplayer);

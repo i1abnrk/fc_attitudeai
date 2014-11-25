@@ -1,3 +1,6 @@
+/*common*/
+#include "nation.h"
+
 #include "utils.h"
 
 const char *strtoupper(const char *src) {
@@ -17,3 +20,4 @@ int calc_halflife(int value, int halflife, int turns) {
   result = (int) math.floor(d_result);
   return result;
 }
+
