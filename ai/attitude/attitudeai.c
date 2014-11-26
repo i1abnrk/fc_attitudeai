@@ -114,13 +114,6 @@ void att_player_alloc(struct player *pplayer) {
   }
 }
 void att_player_alloc(struct player *pplayer) {
-  /*
-  * if the player is ai
-  *   if ai variant exists for player->leader
-        initialize ai variants
-  *   endif
-  * endif
-  */
   if (player_has_variant()) {
     if (aiv_initialized()) {
       ai_variants_free();

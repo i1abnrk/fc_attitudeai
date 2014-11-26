@@ -10,7 +10,7 @@
 #include "aivariant.h"
 
 static struct ai_variant_list master_aiv_list;
-static bool AIV_INITIALIZED=FALSE;
+static bool AIV_INITIALIZED = FALSE;
 
 const char *ai_variant_name(struct ai_variant *paivari) {
   fc_assert_ret_val(NULL != paivari, NULL);
@@ -36,11 +36,17 @@ void ai_variants_init(void) {
     /*TODO: array_pack(ai_variant_array, i)
    * Because I don't want to mess with game.h for a dll/la
    */
-   AIV_INITIALIZED=TRUE;
+   AIV_INITIALIZED = TRUE;
 }
 
 bool aiv_initialized(void) {
   return AIV_INITIALIZED;
+}
+
+void ai_variants_free(void) {
+  FC_FREE(master_aiv_list);
+  master_aiv_list = NULL;
+  AIV_INITIALIZED = FALSE;
 }
 
 /*TODO: Undef favorite|reason_new|destroy 
