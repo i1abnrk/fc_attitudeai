@@ -29,8 +29,8 @@ bool fc_ai_attitude_setup(struct ai_type *ai)
   /* ai->funcs.game_free = NULL;
   TODO: Write corresponding functions (foreign key = local name)*/
   ai->funcs.player_alloc = att_player_alloc;
-  /*ai->funcs.player_free = dai_player_free;
-  ai->funcs.player_save = dai_player_save;
+  ai->funcs.player_free = dai_player_free;
+  /* ai->funcs.player_save = dai_player_save;
   ai->funcs.player_load = dai_player_load;
   ai->funcs.gained_control = dai_assess_danger_player;
   ai->funcs.lost_control = NULL;
@@ -113,5 +113,18 @@ void att_player_alloc(struct player *pplayer) {
     }
   }
 }
-
+void att_player_alloc(struct player *pplayer) {
+  /*
+  * if the player is ai
+  *   if ai variant exists for player->leader
+        initialize ai variants
+  *   endif
+  * endif
+  */
+  if (player_has_variant()) {
+    if (aiv_initialized()) {
+      ai_variants_free();
+    }
+  }
+}
 
