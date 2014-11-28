@@ -14,6 +14,7 @@
 /* server/advisor */
 #include "advdata.h"
 
+/* How many instances */
 #define MAX_NUM_AI_VARIANTS MAX_UINT16
 /* Leave a mandatory one percent chance */
 #define ATTITUDE_FAVOR_MIN -99
@@ -25,6 +26,7 @@
 #define ATTITUDE_HALFLIFE_MIN_TURNS 1
 #define ATTITUDE_HALFLIFE_MAX_TURNS 200
 #define ATTITUDE_HALFLIFE_DEFAULT_TURNS ATTITUDE_HALFLIFE_MAX_TURNS
+#define ATTITUDE_MEMORY_SZ (MAX_NUM_PLAYERS * sizeof(leader_memory))
 #define AAI_CLIP(ait) aai_clip(ait)
 
 struct ai_type;
@@ -142,7 +144,7 @@ struct leader_memory {
 struct ai_variant {
   ai_variant_id id;
 
-  const char *name;
+  char name[MAX_LEN_NAME];
   
   struct reason_list *reasons;
     
@@ -170,9 +172,9 @@ void reason_destroy(struct reason *preason);
 void favorite_new(struct ai_variant *paivari, struct universal type, int value);
 void favorite_destroy(struct favorite *pfavor);
 struct ai_variant *ai_variant_new(const char *name);
+void ai_variant_destroy(const char *name);
 bool rules_have_leader(const char *name);
 int aai_clip(struct ai_trait *ait);
-void ai_variant_destroy(struct ai_variant *paivari);
 /* These foo_amend functions maintain uniqueness. foo_amend is like
  * pfoo = foo_get_index(i);
  * foo_remove(pfoo);

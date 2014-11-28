@@ -11,6 +11,7 @@
 
 static struct ai_variant_list master_aiv_list;
 static bool AIV_INITIALIZED = FALSE;
+static ai_variant_id aiv_id= 0;
 
 const char *ai_variant_name(struct ai_variant *paivari) {
   fc_assert_ret_val(NULL != paivari, NULL);
@@ -33,7 +34,7 @@ void ai_variants_init(void) {
   /*fc_assert_msg(ai_variant_list_size(ai_variant_array) >= player_slot_count());*/
   master_aiv_list = ai_variant_list_new();
   
-    /*TODO: array_pack(ai_variant_array, i)
+    /*TODO: array_pack(master_aiv_list, i)
    * Because I don't want to mess with game.h for a dll/la
    */
    AIV_INITIALIZED = TRUE;
@@ -47,6 +48,40 @@ void ai_variants_free(void) {
   FC_FREE(master_aiv_list);
   master_aiv_list = NULL;
   AIV_INITIALIZED = FALSE;
+}
+
+struct ai_variant ai_variant_new(const char *name) {
+  struct ai_variant aiv = NULL;
+  enum reason_type rtype;
+  enum universals_n ftype;
+  
+  aiv = fc_calloc(1, sizeof(struct ai_variant));
+  aiv->reasons = fc_calloc(REASON_COUNT, sizeof(struct reason));
+  aiv->favorites = fc_calloc(VUT_COUNT, sizeof(struct favorite));
+  
+  if (rules_have_leader(name)) {
+    
+    for(rtype = reason_type_begin(); rtype != reason_type_end(); 
+            rtype = reason_type_next(rtype)) {
+      if(!ai_variant_reason_reset(rtype)) { /* does not exist yet */
+        ai_variant_reason_new(aiv, rtype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_HALFLIFE_DEFAULT_TURNS);
+      }
+    }
+    
+    for(ftype = universals_n_begin(); ftype != universals_n_end(); 
+            ftype = universals_n_next(ftype)) {
+      if(!ai_variant_favorite_reset(ftype)) { /* does not exist yet */
+        ai_variant_favorite_new(aiv, ftype, ATTITUDE_REASON_DEFAULT_VALUE, 
+                ATTITUDE_HALFLIFE_DEFAULT_TURNS);
+      }
+    }
+  }
+  
+  return aiv;
+}
+
+void ai_variant_destroy(const char *name) {
+
 }
 
 /*TODO: Undef favorite|reason_new|destroy 
@@ -152,6 +187,7 @@ bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *ptype
       }
     }
   } reason_list_iterate_end;
+  
   return changed;
 }
 
@@ -190,7 +226,8 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
 bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universal type) {
   bool changed=FALSE;
   enum universals_n un;
-  struct favorite fav=favorite_new(type, ATTITUDE_FAVOR_DEFAULT);
+  struct favorite fav = NULL;
+  fav = favorite_new(type, ATTITUDE_FAVOR_DEFAULT);
   
   favorite_list_iterate(paivari->favorites, oldfav) {
     if (type == oldfav->type) {
@@ -208,7 +245,8 @@ bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universal type) 
 bool rules_have_leader(const char *name) {
   bool found = FALSE;
   nations_iterate(pnation) {
-    struct nation_leader *pleader = nation_leader_by_name(pnation, name);
+    struct nation_leader *pleader = NULL;
+    pleader = nation_leader_by_name(pnation, name);
     if (NULL != pleader) { 
       found = TRUE;
       break;
@@ -292,7 +330,6 @@ struct trait_limit *reason_limits(void) {
   return r_lims;
 }
 
-
 bool player_has_variant(struct player *pplayer) {
   bool is_ai;
   const char *nlname, *ainame;
@@ -300,14 +337,15 @@ bool player_has_variant(struct player *pplayer) {
   is_ai = pplayer->ai_controlled;
   if (!is_ai) {
     return FALSE;
-  }
+  } /* else */
   
   nlname = player_name(*pplayer);
   ai_variant_list_iterate(ai_variants(), paivari) {
     ainame = paivari->name;
-    if (is_ai && nlname == ainame) {
-       return TRUE;   
+    if (0 == strcmp(nlname, ainame)) {
+       return TRUE;
     }
   } ai_variant_list_end;
+  
   return FALSE;
 }

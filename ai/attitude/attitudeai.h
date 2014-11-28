@@ -5,7 +5,11 @@
 #ifndef FCAI__ATTITUDEAI_H
 #define FCAI__ATTITUDEAI_H
 
+/* util */
 #include "fc_types.h"
+
+/* server/advisors */
+#include "advtools.h"
 
 const char *fc_ai_attitude_capstr(void);
 bool fc_ai_attitude_setup(struct ai_type *ai);
