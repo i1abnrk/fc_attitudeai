@@ -9,31 +9,37 @@
 
 #include "aivariant.h"
 
-static struct ai_variant_list master_aiv_list;
+static struct ai_variant *master_aiv_list = NULL;
 static bool AIV_INITIALIZED = FALSE;
 static ai_variant_id aiv_id= 0;
+
+static void ai_variant *ai_variant_new(struct ai_variant *paivari);
 
 const char *ai_variant_name(struct ai_variant *paivari) {
   fc_assert_ret_val(NULL != paivari, NULL);
   return paivari->name;
 }
 
-struct ai_variant *ai_variant_by_number(ai_variant_id id) {
-  fc_assert_msg(id >= 0 && id < ai_variant_list_size(master_aiv_list),
-    "AI Variant id %d out of range. Must be between %d and %d",
-    id, 0, ai_variant_list_size(master_aiv_list));
-
-  return ai_variant_list_get(master_aiv_list, id);
+struct ai_variant *ai_variant_by_number(const ai_variant_id id) {
+  if (id >= 0 && id <= aiv_id) {
+    return NULL;
+  }
+  
+  return master_aiv_list + id;
 }
 
-void ai_variants_init(void) {
+void ai_variants_init(int num) {
+  struct ai_variant *paivari;
   int i;
     /* Ensure we have enough space for players or teams. 
      *TODO: Need more ais in ruleset, for testing.*/
   /*fc_assert_msg(ai_variant_list_size(ai_variant_array) >= team_slot_count());*/
   /*fc_assert_msg(ai_variant_list_size(ai_variant_array) >= player_slot_count());*/
-  master_aiv_list = ai_variant_list_new();
+  master_aiv_list = fc_malloc(num * sizeof(struct ai_variant));
   
+  for (i = 0; i < num; i++) {
+    ai_variant_new(paivari);
+  }
     /*TODO: array_pack(master_aiv_list, i)
    * Because I don't want to mess with game.h for a dll/la
    */
@@ -50,7 +56,8 @@ void ai_variants_free(void) {
   AIV_INITIALIZED = FALSE;
 }
 
-struct ai_variant ai_variant_new(const char *name) {
+/*TODO: set the name*/
+static void ai_variant_new(struct ai_variant *paivari) {
   struct ai_variant aiv = NULL;
   enum reason_type rtype;
   enum universals_n ftype;
@@ -76,6 +83,9 @@ struct ai_variant ai_variant_new(const char *name) {
       }
     }
   }
+  
+  aiv->id = ++aiv_id;
+  ai_variant_list_append(master_aiv_list, aiv);
   
   return aiv;
 }

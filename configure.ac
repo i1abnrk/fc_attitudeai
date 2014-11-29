@@ -24,9 +24,7 @@ AC_DEFINE_UNQUOTED([WIKI_URL], ["$WIKI_URL"], [Informational URL])
 
 AC_DEFINE(DEFAULT_SOCK_PORT, 5556, [Connection TCP Port])
 
-AC_DEFINE_UNQUOTED([PACKAGE_BUGREPORT], ["$BUG_URL"], [Translation bug reporting URL])
 AC_SUBST([BUG_URL])
-AC_SUBST([PACKAGE_BUGREPORT])
 AC_SUBST([WIKI_URL])
 AC_SUBST([MAIL_ADDRESS])
 
@@ -444,6 +442,10 @@ AC_ARG_WITH([default-ai],
   [default_ai_set="${withval}"],
   [])
 
+AC_ARG_WITH([ai-lib],
+  AS_HELP_STRING([--with-ai-lib], [build in default AI code [if needed]]),
+  [ai_mod_default_needed=yes], [])
+
 AM_CONDITIONAL([AI_MOD_DEFAULT_NEEDED],
 [test  "x${ai_mod_default_needed}" = "xyes" || test "x${default_ai_set}" = "x"])
 
@@ -513,72 +515,6 @@ ko lt nl nb pl pt pt_BR ro ru sr sv tr uk zh_CN zh_TW"
 PODOMAINS="freeciv nations ruledit"
 
 AM_GNU_GETTEXT([external], [need-ngettext])
-
-if test "$IS_BETA_VERSION" = "1" || test "$IS_DEVEL_VERSION" = "1"; then
-  AC_MSG_CHECKING([for GNU xgettext version >= 0.14])
-  xgettext_version=`$XGETTEXT --version 2>&1 | grep GNU | head -n 1 | $SED 's/"/ /g'`
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-
-const char *version = "$xgettext_version";
-int main()
-{
-  const char *p = version;
-  int major = 0, minor = 0, patch = 0;
-
-  while (*p != '\0' && (*p < '0' || *p > '9')) {
-    p++;
-  }
-  if (*p == '\0') {
-    return 1;
-  }
-  sscanf(p, "%d.%d.%d", &major, &minor, &patch);
-  if (major < 1 && (minor < 14 || (minor == 14 && patch < 0))) {
-    return 1;
-  }
-  return 0;
-}
-  ]])],[AC_MSG_RESULT([yes])
-  ],[
-   AC_MSG_RESULT([no])
-   AC_MSG_WARN([You may have problems with creating pox files. \
-Please update your gettext package.])
-  ],[echo error
-  ])
-
-  AC_MSG_CHECKING([for GNU msgfmt version >= 0.14])
-  msgfmt_version=`$MSGFMT --version 2>&1 | grep GNU | head -n 1 | $SED 's/"/ /g'`
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-
-const char *version = "$msgfmt_version";
-
-int main()
-{
-  const char *p = version;
-  int major = 0, minor = 0, patch = 0;
-
-  while (*p != '\0' && (*p < '0' || *p > '9')) {
-    p++;
-  }
-  if (*p == '\0') {
-    return 1;
-  }
-  sscanf(p, "%d.%d.%d", &major, &minor, &patch);
-  if (major < 0 && (minor < 14 || (minor == 14 && patch < 0))) {
-    return 1;
-  }
-  return 0;
-}
-  ]])],[AC_MSG_RESULT([yes])
-  ],[
-  AC_MSG_RESULT([no])
-  AC_MSG_ERROR([You are unable to create *.gmo files.
-This is development version which doesn't include them. Please update your
-gettext package. Or use --disable-nls instead.])
-  ],[echo error
-  ])
-fi
 
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES([CURL], [libcurl >= 7.9.7],,
@@ -732,6 +668,8 @@ libxz_available=true])])
 if test "x$libxz_available" != "xtrue" ; then
   feature_xz=missing
 fi
+
+UTILITY_LIBS="${UTILITY_LIBS} ${LTLIBINTL}"
 
 AC_SUBST([UTILITY_CFLAGS])
 AC_SUBST([UTILITY_LIBS])
@@ -1134,7 +1072,7 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([fcntl.h sys/time.h sys/types.h unistd.h sys/utsname.h \
                   sys/file.h libintl.h signal.h strings.h execinfo.h \
-                  libgen.h])
+                  libgen.h locale.h])
 AC_HEADER_STDBOOL
 dnl Avoid including the unix emulation layer if we build mingw executables
 dnl There would be type conflicts between winsock and bsd/unix includes
@@ -1595,6 +1533,7 @@ AC_CONFIG_FILES([Makefile
 	  tools/freeciv-mp-gtk3.desktop:bootstrap/freeciv-mp-gtk3.desktop.in
 	  tools/freeciv-mp-gtk2.desktop:bootstrap/freeciv-mp-gtk2.desktop.in
 	  tools/freeciv-mp-qt.desktop:bootstrap/freeciv-mp-qt.desktop.in
+	  tools/ruledit/freeciv-ruledit.desktop:bootstrap/freeciv-ruledit.desktop.in
           client/freeciv-gtk2.appdata.xml:bootstrap/freeciv-gtk2.appdata.xml.in
           client/freeciv-gtk3.appdata.xml:bootstrap/freeciv-gtk3.appdata.xml.in
           client/freeciv-sdl.appdata.xml:bootstrap/freeciv-sdl.appdata.xml.in
@@ -1603,44 +1542,12 @@ AC_CONFIG_FILES([Makefile
           server/freeciv-server.appdata.xml:bootstrap/freeciv-server.appdata.xml.in
           tools/freeciv-mp-gtk2.appdata.xml:bootstrap/freeciv-mp-gtk2.appdata.xml.in
           tools/freeciv-mp-gtk3.appdata.xml:bootstrap/freeciv-mp-gtk3.appdata.xml.in
-          tools/freeciv-mp-qt.appdata.xml:bootstrap/freeciv-mp-qt.appdata.xml.in])
+          tools/freeciv-mp-qt.appdata.xml:bootstrap/freeciv-mp-qt.appdata.xml.in
+          tools/ruledit/freeciv-ruledit.appdata.xml:bootstrap/freeciv-ruledit.appdata.xml.in])
 AC_CONFIG_FILES([fcgui:bootstrap/fcgui.in], [chmod +x fcgui])
 AC_CONFIG_FILES([fcser:bootstrap/fcser.in], [chmod +x fcser])
 if test "x$ruledit" = "xyes" ; then
   AC_CONFIG_FILES([fcruledit:bootstrap/fcruledit.in], [chmod +x fcruledit])
-fi
-
-if test "$USE_NLS" != "yes" ; then
-
-  dnl Produced config.status will have constant value of FORCE_DIST,
-  dnl but it still checks 'if test x$FORCE_DIST = xyes'. We cannot
-  dnl do that check in configure when producing config.status.
-  AC_CONFIG_COMMANDS([translations/freeciv/Makefile], [
-    for domain in $PODOMAINS ; do
-    dnl Usually glib-gettext.m4:AM_GLIB_GNU_GETTEXT outputs commands to
-    dnl generate translations/${domain}/Makefile.
-    dnl If NLS is disabled, we generate one here.
-    rm -f translations/${domain}/Makefile
-
-    dnl - Add nonls_warn as dependency to dist -target
-    dnl - Remove dependencies from update-po, so it is never rebuilt
-    dnl - Set list of distributed files (no generated files)
-    sed -e 's/^dist distdir:.*/dist distdir: nonls_warn/' \
-        -e 's/^update-po:.*/update-po:/' \
-        -e 's/^DISTFILES =.*/DISTFILES = Makefile.in.in POTFILES.in POTFILES.skip \$(POFILES)/' \
-        translations/${domain}/Makefile.in > translations/${domain}/Makefile
-
-    dnl Create nonls_warn target.
-    echo >> translations/${domain}/Makefile
-    echo nonls_warn: >> translations/${domain}/Makefile
-    if test "x$FORCE_DIST" = "xyes" ; then
-      echo "	@echo Building dist without generated localization files!" >> translations/${domain}/Makefile
-    else
-      echo "	@echo Cannot build dist with NLS disabled! && /bin/false" >> translations/${domain}/Makefile
-    fi
-    done
-  ], [FORCE_DIST=$FORCE_DIST
-PODOMAINS="$PODOMAINS"])
 fi
 
 AC_OUTPUT

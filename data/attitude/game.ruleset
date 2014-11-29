@@ -10,7 +10,7 @@
 ; than minor changes.
 
 [datafile]
-description="Classic game rules for Freeciv"
+description="AI variants for attitude ai"
 options="+Freeciv-ruleset-Devel-2014.September.14c"
 
 [about]

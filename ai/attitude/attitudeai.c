@@ -6,9 +6,13 @@
 #include "ai.h"
 #include "player.h"
 
+/* ai/default */
+#include "aiplayer.h"
+
 /* server */
 #include "aiiface.h"
 
+#include "aivariant.h"
 /* h */
 #include "attitudeai.h"
 
@@ -117,7 +121,7 @@ void att_player_alloc(struct player *pplayer) {
   *   endif
   * endif
   */
-  if (player_has_variant()) {
+  if (player_has_variant(pplayer)) {
     if (!aiv_initialized()) {
       ai_variants_init();
     }
@@ -127,7 +131,7 @@ void att_player_alloc(struct player *pplayer) {
 }
 
 void att_player_free(struct player *pplayer) {
-  if (player_has_variant()) {
+  if (player_has_variant(pplayer)) {
     if (aiv_initialized()) {
       ai_variants_free();
     }

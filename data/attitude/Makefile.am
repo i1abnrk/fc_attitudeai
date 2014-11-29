@@ -4,9 +4,11 @@
 pkgdatadir = $(datadir)/$(PACKAGE)/attitude
 
 pkgdata_DATA =			\
+  ai_effects.ruleset \
   aivariant.ruleset \
 	buildings.ruleset	\
 	cities.ruleset		\
+	default.lua \
 	effects.ruleset		\
 	game.ruleset		\
 	governments.ruleset	\
