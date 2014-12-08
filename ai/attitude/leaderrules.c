@@ -134,7 +134,7 @@ static struct section_file *openload_ruleset_file(const char *whichset)
 
 /**************************************************************************
   Load "name" and (optionally) "rule_name" into a struct name_translation.
-**************************************************************************
+**************************************************************************/
 static void ruleset_load_names(struct name_translation *pname,
                                struct section_file *file,
                                const char *sec_name)
@@ -149,7 +149,7 @@ static void ruleset_load_names(struct name_translation *pname,
   }
 
   names_set(pname, name, rule_name);
-}*/
+}
 
 
 static void load_aivariants(struct section_file *file);
@@ -182,15 +182,15 @@ static void load_aivariants(struct section_file *file) {
   log_verbose("%d ai variants (including possibly unused)", num_aiv);
   /* TODO: Support ruleset translation in Attitude AI.
     Note to translator: "name" is the same as nation_leader->name
-    favorite 
+    favorite */ 
   for (i = 0; i < num_aiv; i++) {
     struct ai_variant *v = ai_variant_by_number(i);
     ruleset_load_names(&v->name, file, section_name(section_list_get(sec, i)));
   }
-  */
+  
   
   if (!aiv_initialized()) {
-    ai_variants_init();
+    ai_variants_init(num_aiv);
   }
   
   i = 0;

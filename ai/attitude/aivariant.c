@@ -1,11 +1,14 @@
 #ifdef HAVE_CONFIG_H
 #include <fc_config.h>
 #endif
-
+#include <string.h>
 /* common */
 #include "nation.h"
 #include "game.h"
 #include "requirements.h"
+
+/* ai/attitude */
+#include "utils.h"
 
 #include "aivariant.h"
 
@@ -13,7 +16,7 @@ static struct ai_variant *master_aiv_list = NULL;
 static bool AIV_INITIALIZED = FALSE;
 static ai_variant_id aiv_id= 0;
 
-static void ai_variant *ai_variant_new(struct ai_variant *paivari);
+static void ai_variant_new(struct ai_variant *paivari);
 
 const char *ai_variant_name(struct ai_variant *paivari) {
   fc_assert_ret_val(NULL != paivari, NULL);
@@ -58,36 +61,29 @@ void ai_variants_free(void) {
 
 /*TODO: set the name*/
 static void ai_variant_new(struct ai_variant *paivari) {
-  struct ai_variant aiv = NULL;
+  memset(paivari, 0, sizeof(*paivari));
   enum reason_type rtype;
   enum universals_n ftype;
-  
-  aiv = fc_calloc(1, sizeof(struct ai_variant));
-  aiv->reasons = fc_calloc(REASON_COUNT, sizeof(struct reason));
-  aiv->favorites = fc_calloc(VUT_COUNT, sizeof(struct favorite));
-  
-  if (rules_have_leader(name)) {
-    
-    for(rtype = reason_type_begin(); rtype != reason_type_end(); 
-            rtype = reason_type_next(rtype)) {
-      if(!ai_variant_reason_reset(rtype)) { /* does not exist yet */
-        ai_variant_reason_new(aiv, rtype, ATTITUDE_REASON_DEFAULT_VALUE, ATTITUDE_HALFLIFE_DEFAULT_TURNS);
-      }
-    }
-    
-    for(ftype = universals_n_begin(); ftype != universals_n_end(); 
-            ftype = universals_n_next(ftype)) {
-      if(!ai_variant_favorite_reset(ftype)) { /* does not exist yet */
-        ai_variant_favorite_new(aiv, ftype, ATTITUDE_REASON_DEFAULT_VALUE, 
-                ATTITUDE_HALFLIFE_DEFAULT_TURNS);
-      }
+      
+  for(rtype = reason_type_begin(); rtype != reason_type_end(); 
+          rtype = reason_type_next(rtype)) {
+    if(!ai_variant_reason_reset(paivari, rtype)) { /* does not exist yet */
+      reason_new(paivari, rtype, 
+        ATTITUDE_REASON_DEFAULT_VALUE, 
+        ATTITUDE_HALFLIFE_DEFAULT_TURNS);
     }
   }
   
-  aiv->id = ++aiv_id;
-  ai_variant_list_append(master_aiv_list, aiv);
-  
-  return aiv;
+  for(ftype = universals_n_begin(); ftype != universals_n_end(); 
+          ftype = universals_n_next(ftype)) {
+    if(!ai_variant_favorite_reset(paivari, ftype)) { /* does not exist yet */
+      favorite_new(paivari, ftype, ATTITUDE_FAVOR_DEFAULT);
+    }
+  }
+  /*TODO: need to get name from somewhere*/
+  paivari->id = ++aiv_id;
+  struct ai_variant *next_aiv = master_aiv_list + aiv_id;
+  memmove(next_aiv, paivari, sizeof(*paivari));
 }
 
 void ai_variant_destroy(const char *name) {
@@ -123,15 +119,16 @@ void reason_destroy(struct reason *preason) {
 }
 
 /** Create a favorite condition. */
-void favorite_new(struct ai_variant *paivari, struct universal type, int value) {
-  fc_assert(universals_n_is_valid(type.kind));
+void favorite_new(struct ai_variant *paivari, enum universals_n kind, int value) {
+  fc_assert(universals_n_is_valid(kind));
   fc_assert_msg(value >= ATTITUDE_FAVOR_MIN && value <= ATTITUDE_FAVOR_MAX, 
             "Invalid value %d for favorite. Must be between %d and %d",
             value, ATTITUDE_FAVOR_MIN, ATTITUDE_FAVOR_MAX);
             
   struct favorite *fav;
   fav = fc_malloc(1 * sizeof(*fav)); 
-  fav->type=type;
+  fav->type.kind=kind;
+  /* fav->type.value=NULL; */
   fav->value=value;
   ai_variant_favorite_amend(paivari, fav);
 }
@@ -160,7 +157,8 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
             halflife<=ATTITUDE_HALFLIFE_MAX_TURNS, 
             "Invalid halflife %d for reason. Must be between %d and %d",
             halflife, ATTITUDE_HALFLIFE_MIN_TURNS, ATTITUDE_HALFLIFE_MAX_TURNS);
-  fc_assert_msg(reason_type_is_valid(type), "Invalid reason_type %s", type) 
+  fc_assert_msg(reason_type_is_valid(type), "Invalid reason_type %s", 
+            reason_type_name(type)); 
   
   reason_list_iterate(paivari->reasons, areason) {
     if(areason->type == type) {
@@ -185,11 +183,11 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
   return changed;
 }
 
-bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type *ptype) {
+bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type ptype) {
   bool changed=FALSE;
   
   reason_list_iterate(paivari->reasons, preason) {
-    if(preason->type == ptype) {
+    if(0 == strcmp(reason_type_name(preason->type), reason_type_name(ptype))) {
       if (preason->value != ATTITUDE_REASON_DEFAULT_VALUE || 
             preason->halflife != ATTITUDE_HALFLIFE_DEFAULT_TURNS) {
         changed = TRUE;
@@ -214,15 +212,14 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
             "Invalid value %d for favorite. Must be between %d and %d",
             value, ATTITUDE_FAVOR_MIN, ATTITUDE_FAVOR_MAX);
             
-  struct universal type;
   /* TODO: validate pfavor->type.value*/
   favorite_list_iterate(paivari->favorites, afavor) {
     if (kind == afavor->type.kind) {
-      if (afavor->type.value != pfavor->type.value) {
+      if (0 == universalcmp(pfavor->type, afavor->type)) {
         changed = TRUE;
         afavor->type.value = pfavor->type.value;
-      }
-      if (afavor->value != value) {
+      } 
+      else {
         changed = TRUE;
         afavor->value = value;
       }
@@ -233,20 +230,21 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
 }
 
 /* foo_remove actually resets default values */
-bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universal type) {
+bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universals_n type) {
   bool changed=FALSE;
-  enum universals_n un;
-  struct favorite fav = NULL;
-  fav = favorite_new(type, ATTITUDE_FAVOR_DEFAULT);
   
   favorite_list_iterate(paivari->favorites, oldfav) {
-    if (type == oldfav->type) {
-      if (oldfav != fav) {
+    if (type == oldfav->type.kind) {
+      if (oldfav->value == ATTITUDE_FAVOR_DEFAULT) {
+        changed = FALSE;
+      } 
+      else {
+        oldfav->value = ATTITUDE_FAVOR_DEFAULT;
         changed = TRUE;
-        oldfav = fav;
       }
+      break;
     }    
-  } favorite_list_iterate_end();
+  } favorite_list_iterate_end;
   
   return changed;
 }
@@ -273,25 +271,26 @@ bool rules_have_leader(const char *name) {
  
 int aai_clip(struct ai_trait ait) {
   if (ait.mod >= 0) { 
-    return CLIP(ait.mod, ait.val, 100)
+    return CLIP(ait.mod, ait.val, 100);
   } else {
-    return CLIP(0, ait.val, 100-ait.mod)
+    return CLIP(0, ait.val, 100-ait.mod);
   }
 }
 
-struct ai_trait *favorite_as_trait(struct favorite *pfavor) {
+struct ai_trait favorite_as_trait(struct favorite *pfavor) {
   struct ai_trait f_trait;
   int ft_val, ft_mod;
   
   ft_val = ATTITUDE_FAVOR_DEFAULT;
   ft_mod = pfavor->value;
   
-  f_trait = (ai_trait) {"val"=ft_val, "mod"=ft_mod};
+  f_trait.val=ft_val; 
+  f_trait.mod=ft_mod;
   
   return f_trait;
 }
 
-struct trait_limits *favorite_limits(void) {
+struct trait_limits favorite_limits(void) {
   struct trait_limits f_lims;
   f_lims.min = ATTITUDE_FAVOR_MIN;
   f_lims.max = ATTITUDE_FAVOR_MAX;
@@ -304,7 +303,7 @@ struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_
   enum reason_type rt_type;
   int curr_turn, rt_adj, rt_hl, rt_turns, rt_val, slot;
   
-  paivari = get_aiv_by_number(our_aiv_id);
+  paivari = ai_variant_by_number(our_aiv_id);
   rt_type = prtype;
   slot = their_slot_id;
   curr_turn = game.info.turn;
@@ -333,7 +332,7 @@ struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_
   return r_trait;
 }
 
-struct trait_limit *reason_limits(void) {
+struct trait_limit reason_limits(void) {
   struct trait_limits r_lims;
   r_lims.min=ATTITUDE_REASON_MIN_VALUE;
   r_lims.max=ATTITUDE_REASON_MAX_VALUE;

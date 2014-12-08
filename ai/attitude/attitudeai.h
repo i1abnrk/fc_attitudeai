@@ -8,9 +8,6 @@
 /* util */
 #include "fc_types.h"
 
-/* server/advisors */
-#include "advtools.h"
-
 const char *fc_ai_attitude_capstr(void);
 bool fc_ai_attitude_setup(struct ai_type *ai);
 bool leader_has_attitude(struct nation_leader pleader);

@@ -9,10 +9,13 @@
 /* ai/default */
 #include "aiplayer.h"
 
+/* server/advisors */
+#include "advtools.h"
+
 /* server */
 #include "aiiface.h"
 
-#include "aivariant.h"
+#include "leaderrules.h"
 /* h */
 #include "attitudeai.h"
 
@@ -123,7 +126,7 @@ void att_player_alloc(struct player *pplayer) {
   */
   if (player_has_variant(pplayer)) {
     if (!aiv_initialized()) {
-      ai_variants_init();
+      load_ai_variant_rulesets(TRUE);
     }
   }
   struct ai_type *deftype = att_get_type();
