@@ -20,9 +20,12 @@ const char *strtoupper(char *src) {
     dtmp[i + 1] = '\0';
   }
   
-  const char *dest;
+  const char *dest = dtmp;
   
-  memcpy(dtmp, dest, l);
+  //strcpy(dest, dtmp);
+  
+  /*give our local pointer back to heap*/
+  free(dtmp);
   
   return dest;
 }
@@ -42,13 +45,16 @@ int universalcmp(struct universal u1, struct universal u2) {
   int kindcmp;
   enum universals_n kind1 = u1.kind, kind2 = u2.kind;
   universals_u value1 = u1.value, value2 = u2.value;
+  
+  /* universals_n_name is comparable as a string, compare value of type.kind */
   kindcmp = strcmp(universals_n_name(kind1), universals_n_name(kind2));
   if (kindcmp != 0) {
     return kindcmp;
   }
   
-  bool kindcmp = fc_strcasecmp(kind1, kind2);
-  
+  /*if the kind is the same compare the values. 
+   *values type can be int, enum int or struct
+   *so compare size. Should be always the same size here, but check.*/
   int sz1 = sizeof(value1);
   int sz2 = sizeof(value2);
   
@@ -62,10 +68,8 @@ int universalcmp(struct universal u1, struct universal u2) {
   /*same kind and size*/
   
   /*the structs all have an inttype id field*/
-  if(NULL!=FC_MEMBER(typeof(value1), "id") && FC_MEMBER(typeof(value2), "id")) {
-    return (value1->id==value2->id)?0:((value1->id > value2->id)?1:-1);
-  } else {
-    return (value1==value2)?0:((value1>value2)?1:-1);
+  if (sizeof(typeof(value1))!=sizeof(int)) {
+  
   }
   
   return 0;
