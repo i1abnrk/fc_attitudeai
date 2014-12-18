@@ -1,8 +1,15 @@
 #include <math.h>
 #include <string.h>
 
+/*gen_headers*/
+#include "freeciv_config.h"
+
 /*utility*/
+#include "fcintl.h"
 #include "support.h"
+
+/*common
+#include "requirements.h"*/
 
 #include "utils.h"
 
@@ -22,8 +29,6 @@ const char *strtoupper(char *src) {
   
   const char *dest = dtmp;
   
-  //strcpy(dest, dtmp);
-  
   /*give our local pointer back to heap*/
   free(dtmp);
   
@@ -35,13 +40,13 @@ int calc_halflife(int value, int halflife, int turns) {
   double d_result;
   double factor;
   
-  factor = 1.0 / pow(2.0, ((double) turns / halflife));
+  factor = pow(0.5, ((double) turns / halflife));
   d_result = factor * value;
   result = (int) floor(d_result);
   return result;
 }
 
-int universalcmp(struct universal u1, struct universal u2) {
+int universalcmp(const struct universal u1, const struct universal u2) {
   int kindcmp;
   enum universals_n kind1 = u1.kind, kind2 = u2.kind;
   universals_u value1 = u1.value, value2 = u2.value;
@@ -52,25 +57,18 @@ int universalcmp(struct universal u1, struct universal u2) {
     return kindcmp;
   }
   
-  /*if the kind is the same compare the values. 
-   *values type can be int, enum int or struct
-   *so compare size. Should be always the same size here, but check.*/
-  int sz1 = sizeof(value1);
-  int sz2 = sizeof(value2);
+  int un1 = universal_number(u1), un2 = universal_number(u2);
   
-  if(sz1 > sz2) {
-    return 1;
-  }
-  
-  if(sz2 > sz1) {
+  if (un1==un2) {
+    return 0;
+  } else {
+    if (un1 > un2) {
+      return 1;
+    }
     return -1;
   }
-  /*same kind and size*/
   
-  /*the structs all have an inttype id field*/
-  if (sizeof(typeof(value1))!=sizeof(int)) {
-  
-  }
+  /* TODO: should not be here, let's throw a fit. */
   
   return 0;
 }

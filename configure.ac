@@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([common/game.c])
 AC_CONFIG_AUX_DIR(bootstrap) # This can't be quoted or automake will fail
 AC_CONFIG_MACRO_DIR([m4])
 ifdef([AC_CONFIG_MACRO_DIRS],[AC_CONFIG_MACRO_DIRS([dependencies/m4])])
-AC_CONFIG_HEADERS([fc_config.h gen_headers/freeciv_config.h])
+AC_CONFIG_HEADERS([gen_headers/fc_config.h gen_headers/freeciv_config.h])
 AC_CANONICAL_HOST
 AC_USE_SYSTEM_EXTENSIONS
 AC_C_BIGENDIAN
@@ -516,6 +516,10 @@ PODOMAINS="freeciv nations ruledit"
 
 AM_GNU_GETTEXT([external], [need-ngettext])
 
+if test "x$USE_NLS" = "xyes" ; then
+  AC_DEFINE([FREECIV_ENABLE_NLS], [1], [Native language support enabled])
+fi
+
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES([CURL], [libcurl >= 7.9.7],,
     [AC_MSG_ERROR([libcurl development files required])])
@@ -699,10 +703,10 @@ if test x$crosser != xyes ; then
   FC_LD_FLAGS([-pthread], [], [LIBS])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>]],
     [[return pthread_create(NULL, NULL, NULL, NULL);]])],
-    [AC_DEFINE([HAVE_PTHREAD], [1], [Use pthreads as thread implementation])
+    [AC_DEFINE([FREECIV_HAVE_PTHREAD], [1], [Use pthreads as thread implementation])
     thread_impl=pthreads
     AC_MSG_RESULT([pthreads])
-    AC_DEFINE([HAVE_THREAD_COND], [1], [Has thread condition variable implementation])])
+    AC_DEFINE([FREECIV_HAVE_THREAD_COND], [1], [Has thread condition variable implementation])])
     thread_cond=true
 fi
 
@@ -712,7 +716,7 @@ if test "x$thread_impl" = "xnone" ; then
 
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <windows.h>]],
     [[CreateThread(NULL, 0, NULL, NULL, 0, NULL);]])],
-    [AC_DEFINE([HAVE_WINTHREADS], [1], [Use Windows threads as thread implementation])
+    [AC_DEFINE([FREECIV_HAVE_WINTHREADS], [1], [Use Windows threads as thread implementation])
     thread_impl=windows
     AC_MSG_RESULT([windows])])
 fi
@@ -1071,8 +1075,10 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([fcntl.h sys/time.h sys/types.h unistd.h sys/utsname.h \
-                  sys/file.h libintl.h signal.h strings.h execinfo.h \
-                  libgen.h locale.h])
+                  sys/file.h signal.h strings.h execinfo.h \
+                  libgen.h])
+AC_CHECK_HEADERS([locale.h], [AC_DEFINE([FREECIV_HAVE_LOCALE_H], [1], [locale.h available])])
+AC_CHECK_HEADERS([libintl.h], [AC_DEFINE([FREECIV_HAVE_LIBINTL_H], [1], [libint.h available])])
 AC_HEADER_STDBOOL
 dnl Avoid including the unix emulation layer if we build mingw executables
 dnl There would be type conflicts between winsock and bsd/unix includes
@@ -1412,9 +1418,9 @@ AC_CONFIG_FILES([Makefile
           data/civ2civ3/Makefile
 	  data/civ1/Makefile
 	  data/civ2/Makefile
-	  data/attitude/Makefile
 	  data/scenarios/Makefile
 	  data/nation/Makefile
+	  data/attitude/Makefile
 	  data/themes/Makefile
 	  data/themes/gui-gtk-2.0/Makefile
 	  data/themes/gui-gtk-2.0/Freeciv/Makefile
@@ -1484,8 +1490,8 @@ AC_CONFIG_FILES([Makefile
           ai/default/Makefile
           ai/classic/Makefile
           ai/stub/Makefile
-          ai/attitude/Makefile
           ai/threaded/Makefile
+          ai/attitude/Makefile
 	  tests/Makefile
   	  win32/Makefile
 	  client/Makefile
@@ -1574,12 +1580,14 @@ AC_MSG_NOTICE([
     Gtk-2.0: $gui_gtk2
     SDL:     $gui_sdl
     QT:      $gui_qt
-    Xaw:     $gui_xaw
     Stub:    $gui_stub
 
   In-development client frontends:
   (these are not yet ready for general use)
     SDL2:    $gui_sdl2
+
+  Not maintained client frontends:
+    Xaw:     $gui_xaw
 
   == Server ==
   Build freeciv server:  $server

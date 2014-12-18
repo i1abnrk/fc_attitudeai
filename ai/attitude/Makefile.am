@@ -7,6 +7,7 @@ aimodule_LTLIBRARIES = fc_ai_attitude.la
 
 AM_CPPFLAGS = \
 -I$(top_srcdir) \
+-I$(top_srcdir)/gen_headers/ \
 -I$(top_srcdir)/utility \
 -I$(top_srcdir)/common \
 -I$(top_srcdir)/ai \
