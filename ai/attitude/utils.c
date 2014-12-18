@@ -5,11 +5,10 @@
 #include "freeciv_config.h"
 
 /*utility*/
-#include "fcintl.h"
 #include "support.h"
 
-/*common
-#include "requirements.h"*/
+/*common*/
+#include "requirements.h"
 
 #include "utils.h"
 
@@ -46,10 +45,9 @@ int calc_halflife(int value, int halflife, int turns) {
   return result;
 }
 
-int universalcmp(const struct universal u1, const struct universal u2) {
+int universalcmp(const struct universal *u1, const struct universal *u2) {
   int kindcmp;
-  enum universals_n kind1 = u1.kind, kind2 = u2.kind;
-  universals_u value1 = u1.value, value2 = u2.value;
+  enum universals_n kind1 = u1->kind, kind2 = u2->kind;
   
   /* universals_n_name is comparable as a string, compare value of type.kind */
   kindcmp = strcmp(universals_n_name(kind1), universals_n_name(kind2));
@@ -67,8 +65,6 @@ int universalcmp(const struct universal u1, const struct universal u2) {
     }
     return -1;
   }
-  
-  /* TODO: should not be here, let's throw a fit. */
   
   return 0;
 }
