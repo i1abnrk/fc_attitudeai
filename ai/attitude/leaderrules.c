@@ -134,8 +134,9 @@ static struct section_file *openload_ruleset_file(const char *whichset)
 
 /**************************************************************************
   Load "name" and (optionally) "rule_name" into a struct name_translation.
-**************************************************************************/
-static void ruleset_load_names(struct name_translation *pname,
+**************************************************************************
+static bool ruleset_load_names(struct name_translation *pname,
+                               const char *domain,
                                struct section_file *file,
                                const char *sec_name)
 {
@@ -143,13 +144,16 @@ static void ruleset_load_names(struct name_translation *pname,
   const char *rule_name = secfile_lookup_str(file, "%s.rule_name", sec_name);
 
   if (!name) {
-    ruleset_error(LOG_FATAL,
+    ruleset_error(LOG_ERROR,
                   "\"%s\" [%s]: no \"name\" specified.",
                   secfile_name(file), sec_name);
+    return FALSE;
   }
 
-  names_set(pname, name, rule_name);
-}
+  names_set(NULL, domain, name, rule_name);
+
+  return TRUE;
+}*/
 
 
 static void load_aivariants(struct section_file *file);
@@ -180,13 +184,15 @@ static void load_aivariants(struct section_file *file) {
                   filename, num_aiv, MAX_NUM_AI_VARIANTS);
   }
   log_verbose("%d ai variants (including possibly unused)", num_aiv);
+
   /* TODO: Support ruleset translation in Attitude AI.
     Note to translator: "name" is the same as nation_leader->name
-    favorite */ 
+    favorite
   for (i = 0; i < num_aiv; i++) {
     struct ai_variant *v = ai_variant_by_number(i);
-    ruleset_load_names(&v->name, file, section_name(section_list_get(sec, i)));
-  }
+    const char *sec_name = section_name(section_list_get(sec, i))
+    v->name = ;
+  }*/
   
   
   if (!aiv_initialized()) {
@@ -203,14 +209,15 @@ static void load_aivariants(struct section_file *file) {
      ****************************************************************/
     struct ai_variant *v = ai_variant_by_number(i);
     v->id = i;
-    vname = secfile_lookup_str(file, "%s.%s", sec_name, "name");
+    const char *vname = secfile_lookup_str(file, "%s.%s", sec_name, "name");
     if (!rules_have_leader(vname)) {
       ruleset_error(LOG_ERROR, "Leader name in aivariants.ruleset \'%s\' not found in nations.ruleset",
                  vname);
     }
-    v->name = vname;
+    sz_strlcpy(v->name, vname);
     load_reasons(file, v, psection);
     load_favorites(file, v, psection);
+    
     /*TODO: LOAD memories FROM SAVEFILE*/
     v->memory = leader_memory_list_new();
     i++;
@@ -220,13 +227,13 @@ static void load_aivariants(struct section_file *file) {
 }
 
 enum reason_type reason_type_by_rule(const char *type) {
-  const char *rulename = strcat("REASON_", strtoupper(type));
-  enum reason_type type = reason_type_by_name(rulename, fc_strcasecmp);
-  if(!reason_type_is_valid(type)) {
+  enum reason_type rtype = reason_type_by_name(type, fc_strcasecmp);
+  /*TODO: validate reason_type
+  if(!reason_type_is_valid(rtype)) {
     ruleset_error(LOG_FATAL, ("Invalid reason_type \'%s\' in ruleset %s."), 
-        type, rulename);
-  }
-  return type;
+        rtype, rulename);
+  }*/
+  return rtype;
 }
 
 void load_reasons(struct section_file *file, struct ai_variant *paivari, 

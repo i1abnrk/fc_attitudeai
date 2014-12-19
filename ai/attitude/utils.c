@@ -12,7 +12,7 @@
 
 #include "utils.h"
 
-const char *strtoupper(char *src) {
+const char *strtoupper(const char *src) {
   int i=0, l = strlen(src);
   char stmp;
   /* dtmp = to_upper(stmp) */

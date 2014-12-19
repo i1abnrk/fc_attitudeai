@@ -29,7 +29,7 @@ format, sec, rstr, row))
 #define LOOKUP_INT_REASON_HL(file, format, sec, rstr, row)  \
 FC_PTR_TO_INT(\
 secfile_lookup_int_def_min_max(file, \
-ATTITUDE_HALFLIFE_DEF_TURNS, ATTITUDE_HALFLIFE_MIN_TURNS, ATTITUDE_HALFLIFE_MAX_TURNS, \
+ATTITUDE_HALFLIFE_DEFAULT_TURNS, ATTITUDE_HALFLIFE_MIN_TURNS, ATTITUDE_HALFLIFE_MAX_TURNS, \
 format, sec, rstr, row))
 
 #define LOOKUP_INT_FAVORITE_VAL(file, format, sec, rstr, row)  \
