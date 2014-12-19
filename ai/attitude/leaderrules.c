@@ -255,7 +255,7 @@ void load_reasons(struct section_file *file, struct ai_variant *paivari,
     row++;
     
     enum reason_type rtype = reason_type_by_rule(type);
-    ai_variant_reason_amend(paivari, rtype, val, hl);
+    reason_new(paivari, rtype, val, hl);
     type = secfile_lookup_str_default(file, NULL, "%s.%s%d.type", sec, rstr, row);
   }//wend
 }
@@ -280,8 +280,8 @@ void load_favorites(struct section_file *file,
     val = LOOKUP_INT_FAVORITE_VAL(file, "%s.%s%d.value", sec, fstr, row);
     row++;
     
-    struct universal ftype = universal_by_rule_name(type, name);
-    ai_variant_favorite_amend(paivari, ftype, val);
+    enum universals_n kind = universals_n_by_name(name);
+    favorite_new(paivari, kind, val);
     type = secfile_lookup_str_default(file, NULL, "%s.%s%d.type", sec, fstr, row);
     name = secfile_lookup_str_default(file, NULL, "%s.%s%d.name", sec, fstr, row);
   }//wend
