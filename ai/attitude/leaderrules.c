@@ -280,7 +280,7 @@ void load_favorites(struct section_file *file,
     val = LOOKUP_INT_FAVORITE_VAL(file, "%s.%s%d.value", sec, fstr, row);
     row++;
     
-    enum universals_n kind = universals_n_by_name(name);
+    enum universals_n kind = universals_n_by_name(name, fc_strcasecmp);
     favorite_new(paivari, kind, val);
     type = secfile_lookup_str_default(file, NULL, "%s.%s%d.type", sec, fstr, row);
     name = secfile_lookup_str_default(file, NULL, "%s.%s%d.name", sec, fstr, row);
