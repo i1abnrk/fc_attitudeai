@@ -21,7 +21,7 @@ const char *ai_variant_name(struct ai_variant *paivari) {
 }
 
 struct ai_variant *ai_variant_by_number(const ai_variant_id id) {
-  if (id >= 0 && id <= aiv_id) {
+  if (id >= 0 && id > aiv_id) {
     return NULL;
   }
   
@@ -58,7 +58,8 @@ void ai_variants_free(void) {
 
 /*TODO: set the name*/
 static void ai_variant_new(struct ai_variant *paivari) {
-  memset(paivari, 0, sizeof(*paivari));
+  
+  paivari = malloc(sizeof(*paivari));
   enum reason_type rtype;
   enum universals_n ftype;
       
@@ -79,8 +80,6 @@ static void ai_variant_new(struct ai_variant *paivari) {
   }
   /*TODO: need to get name from somewhere*/
   paivari->id = ++aiv_id;
-  struct ai_variant *next_aiv = master_aiv_list + aiv_id;
-  memmove(next_aiv, paivari, sizeof(*paivari));
 }
 
 void ai_variant_destroy(const char *name) {
@@ -212,7 +211,7 @@ bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfav
   /* TODO: validate pfavor->type.value*/
   favorite_list_iterate(paivari->favorites, afavor) {
     if (kind == afavor->type.kind) {
-      if (0 == universalcmp(pfavor->type, afavor->type)) {
+      if (0 == universalcmp(&pfavor->type, &afavor->type)) {
         changed = TRUE;
         afavor->type.value = pfavor->type.value;
       } 
@@ -273,7 +272,7 @@ int aai_clip(struct ai_trait ait) {
     return CLIP(0, ait.val, 100-ait.mod);
   }
 }
-
+/*
 struct ai_trait favorite_as_trait(struct favorite *pfavor) {
   struct ai_trait f_trait;
   int ft_val, ft_mod;
@@ -296,35 +295,36 @@ struct trait_limits favorite_limits(void) {
 
 struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_type *prtype) {
   struct ai_trait r_trait;
-  struct aivariant *paivari;
-  enum reason_type rt_type;
+  struct ai_variant *paivari;
   int curr_turn, rt_adj, rt_hl, rt_turns, rt_val, slot;
-  
-  paivari = ai_variant_by_number(our_aiv_id);
-  rt_type = prtype;
+  const struct ai_variant *our_aiv = ai_variant_by_number(our_aiv_id);
+  memcpy(paivari, our_aiv, sizeof(struct ai_variant));
   slot = their_slot_id;
   curr_turn = game.info.turn;
   
-  /*calculate memories*/
+  //calculate memories
   leader_memory_list_iterate(paivari, pmemory) {
     enum reason_type mtype = pmemory->reason.type;
-    if (rt_type == mtype) {
+    if (((int) *prtype) == mtype) {
       if (slot == pmemory->nation) {
         rt_turns = curr_turn - pmemory->first_turn;
-        rt_hl = pmemory.reason.halflife;
-        rt_val = pmemory.reason.value;
+        rt_hl = pmemory->reason.halflife;
+        rt_val = pmemory->reason.value;
         rt_adj = calc_halflife(rt_val, rt_hl, rt_turns);
-        rt_adj = ((pmemory->sympathetic)?rt_adj:-rt_adj));
+        rt_adj = ((pmemory->sympathy)?rt_adj:-rt_adj);
       } else {
         rt_adj = 0;
       }
     } else {
       rt_adj = 0;
     }
-  } leader_memory_list_end;
+  } leader_memory_list_iterate_end;
   
   r_trait = (ai_trait) {"val"=ATTITUDE_REASON_DEFAULT_VALUE, "mod"=rt_adj};  
   r_trait = aai_clip(r_trait);
+  
+  free(our_aiv)
+  free(paivari)
   
   return r_trait;
 }
@@ -343,7 +343,7 @@ bool player_has_variant(struct player *pplayer) {
   is_ai = pplayer->ai_controlled;
   if (!is_ai) {
     return FALSE;
-  } /* else */
+  } // else
   
   nlname = player_name(*pplayer);
   ai_variant_list_iterate(ai_variants(), paivari) {
@@ -355,3 +355,4 @@ bool player_has_variant(struct player *pplayer) {
   
   return FALSE;
 }
+*/

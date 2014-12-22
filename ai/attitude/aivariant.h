@@ -203,8 +203,10 @@ bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason)
 bool ai_variant_reason_reset(struct ai_variant *paivari, enum reason_type rtype);
 bool ai_variant_favorite_amend(struct ai_variant *paivari, struct favorite *pfavor);
 bool ai_variant_favorite_reset(struct ai_variant *paivari, enum universals_n kind);
+/*
 struct ai_trait favorite_as_trait(struct favorite *pfavor);
 struct trait_limits favorite_limits(void);
 struct ai_trait *reason_as_trait(int our_aiv_id, int their_slot_id, enum reason_type *prtype);
 struct trait_limit reason_limits(void);
+*/
 bool player_has_variant(struct player *pplayer);
