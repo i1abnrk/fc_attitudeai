@@ -46,4 +46,10 @@ HOW TO BUILD
 2) ./autogen.sh in fc_attitudeai
 3) run 'configure' for fc_attitudeai, with options
    --with-freecivbld=/path/to/freeciv/builddir --with-freecivsrc=/path/to/freeciv/srcdir
-4) make
+4) make install
+
+HOW TO USE IN FREECIV
+Launch freeciv with commandline option "-L attitude". Attitude AI module must be in correct
+module directory for it to be found. If it's not found, try to adjust --with-aimoddir
+configure option to match directory freeciv search modules from, and make sure you're done
+'make install', not just 'make', to install the module there.
