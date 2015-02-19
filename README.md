@@ -40,8 +40,16 @@ Doesn't add functionality in it's current state.
 It compiles with freeciv-trunk as of writing. This may change. 
 It is recommended to use only on Linux at the moment.
 
-HOW TO USE
-1) copy the files recursively into an svn checkout of freeciv
-2) run autogen.sh with the following options:
-   --enable-debug --enable-shared --enable-aimodules=experimental
-3) type 'make' and cross your fingers
+HOW TO BUILD
+1) Build freeciv in its own directories, configured with
+   --enable-shared --enable-aimodules
+2) ./autogen.sh in fc_attitudeai
+3) run 'configure' for fc_attitudeai, with options
+   --with-freecivbld=/path/to/freeciv/builddir --with-freecivsrc=/path/to/freeciv/srcdir
+4) make install
+
+HOW TO USE IN FREECIV
+Launch freeciv with commandline option "-L attitude". Attitude AI module must be in correct
+module directory for it to be found. If it's not found, try to adjust --with-aimoddir
+configure option to match directory freeciv search modules from, and make sure you're done
+'make install', not just 'make', to install the module there.
