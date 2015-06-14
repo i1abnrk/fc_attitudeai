@@ -11,7 +11,7 @@
 
 static struct ai_variant *master_aiv_list = NULL;
 static bool AIV_INITIALIZED = FALSE;
-static ai_variant_id aiv_id= 0;
+static ai_variant_id aiv_id = 0;
 
 static void ai_variant_new(struct ai_variant *paivari);
 
@@ -28,6 +28,22 @@ struct ai_variant *ai_variant_by_number(const ai_variant_id id) {
   return master_aiv_list + id;
 }
 
+struct ai_variant *ai_variant_by_name(const char *name) {
+  /*Temp variable*/
+  struct ai_variant *paivari = NULL;
+  int id;
+  
+  for (id = 0; id < aiv_id; id++) {
+    paivari = ai_variant_by_number(id);
+    if (strcmp(ai_variant_name(paivari), name)) {
+      return paivari;
+    }
+    paivari = NULL;
+  }
+  FC_FREE(paivari);
+  return NULL;
+}
+
 void ai_variants_init(int num) {
   struct ai_variant *paivari;
   int i;
@@ -38,9 +54,10 @@ void ai_variants_init(int num) {
   master_aiv_list = fc_malloc(num * sizeof(struct ai_variant));
   
   for (i = 0; i < num; i++) {
+    paivari = fc_malloc(sizeof(*paivari));
     ai_variant_new(paivari);
   }
-    /*TODO: array_pack(master_aiv_list, i)
+   /*TODO: array_pack(master_aiv_list, i)
    * Because I don't want to mess with game.h for a dll/la
    */
    AIV_INITIALIZED = TRUE;
@@ -59,13 +76,13 @@ void ai_variants_free(void) {
 /*TODO: set the name*/
 static void ai_variant_new(struct ai_variant *paivari) {
   
-  paivari = malloc(sizeof(*paivari));
   enum reason_type rtype;
   enum universals_n ftype;
       
   for(rtype = reason_type_begin(); rtype != reason_type_end(); 
           rtype = reason_type_next(rtype)) {
-    if(!ai_variant_reason_reset(paivari, rtype)) { /* does not exist yet */
+    /*reset returns FALSE when paivari with rtype does not exist yet.*/
+    if(!ai_variant_reason_reset(paivari, rtype)) { 
       reason_new(paivari, rtype, 
         ATTITUDE_REASON_DEFAULT_VALUE, 
         ATTITUDE_HALFLIFE_DEFAULT_TURNS);
@@ -78,13 +95,32 @@ static void ai_variant_new(struct ai_variant *paivari) {
       favorite_new(paivari, ftype, ATTITUDE_FAVOR_DEFAULT);
     }
   }
-  /*TODO: need to get name from somewhere*/
+  /*TODO: need to get name from somewhere, leaderrules is circular reference*/
   paivari->id = ++aiv_id;
 }
 
+/*Restores all default values, ai_variants_free is the best way to free memory.*/
 void ai_variant_destroy(const char *name) {
-
+  if (rules_have_leader(name)) {
+    /*TODO: Need function to get by name.*/
+    struct ai_variant *paivari = ai_variant_by_name(name);
+    
+    reason_list_iterate(&paivari->reasons, preason) {
+      reason_destroy(preason);
+    } reason_list_iterate_end;
+    
+    favorite_list_iterate(&paivari->favorites, pfavor) {
+      favorite_destroy(pfavor);
+    } favorite_list_iterate_end;
+    
+    FC_FREE(paivari->memory);
+    
+    paivari = NULL;
+  }
+  
 }
+
+/*TODO: split following types into their own definition files and import the headers.*/
 
 /*TODO: Undef favorite|reason_new|destroy 
  * and use favorite|reason_list_amend|remove instead */
@@ -110,7 +146,6 @@ void reason_destroy(struct reason *preason) {
   free(&preason->type);
   free(&preason->value);
   free(&preason->halflife);
-  free(preason);
   preason = NULL;
 }
 
@@ -132,7 +167,7 @@ void favorite_new(struct ai_variant *paivari, enum universals_n kind, int value)
 void favorite_destroy(struct favorite *pfavor) {
   free(&pfavor->type);
   free(&pfavor->value);
-  free(pfavor);
+  pfavor = NULL;
 }
 
 bool ai_variant_reason_amend(struct ai_variant *paivari, struct reason *preason) {
@@ -258,6 +293,8 @@ bool rules_have_leader(const char *name) {
   } nations_iterate_end;
   return found;
 }
+
+/*TODO: leader_memory constructor / destructor*/
 
 /**
  * As ai_trait_get_value in aitraits.h, but clips negative mod from the high

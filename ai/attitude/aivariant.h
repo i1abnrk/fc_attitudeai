@@ -54,6 +54,7 @@ struct favorite {
 #define favorite_list_iterate(favorites, pfavor)         \
   TYPED_LIST_ITERATE(struct favorite, favorites, pfavor)
 #define favorite_list_iterate_end LIST_ITERATE_END
+
 /*Reasons to make temporary adjustments to advdata of player ai
  *TODO: Test these incrementally until universal_u|favorite|score_component can reasonably
  *substitute for reason_type in the functions created.*/
@@ -84,6 +85,7 @@ struct favorite {
   REASON_LAST  stop iterating reasons
 };
 */
+
 #define SPECENUM_NAME reason_type
 #define SPECENUM_VALUE0 REASON_FOOD
 #define SPECENUM_VALUE0NAME "Food"
@@ -127,6 +129,7 @@ struct reason {
   int value;
   int halflife;
 };
+
 /* Nation leader ai data. */
 #define SPECLIST_TAG reason
 #define SPECLIST_TYPE struct reason
@@ -134,7 +137,6 @@ struct reason {
 #define reason_list_iterate(reasons, preason)                     \
   TYPED_LIST_ITERATE(struct reason, reasons, preason)
 #define reason_list_iterate_end LIST_ITERATE_END
-
 
 /*adjustment value calculated relative to the formula 
  adjust * (curr_turn-first_turn) / halflife * ln(2) 
@@ -150,6 +152,7 @@ struct leader_memory {
   bool sympathy;
   bool helped;/*did nation seem to respond to diplomacy?*/
 };
+
 /* Nation leader ai data. */
 #define SPECLIST_TAG leader_memory
 #define SPECLIST_TYPE struct leader_memory
@@ -181,6 +184,7 @@ struct ai_variant {
 const char *ai_variant_name(struct ai_variant *paivari);
 struct ai_variant_list *ai_variants(void);
 struct ai_variant *ai_variant_by_number(ai_variant_id id);
+struct ai_variant *ai_variant_by_name(const char *name);
 bool aiv_initialized(void);
 void ai_variants_init(int num);
 void ai_variants_free(void);
